@@ -2,9 +2,9 @@ import os
 import sys
 from logging import getLogger, Formatter, DEBUG, INFO, WARNING, ERROR, StreamHandler
 from logging.handlers import RotatingFileHandler
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton, QProgressBar, QRadioButton, QButtonGroup, QHBoxLayout, QShortcut, QLineEdit
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-from PyQt5.QtGui import QKeySequence
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton, QProgressBar, QRadioButton, QButtonGroup, QHBoxLayout, QLineEdit
+from PySide6.QtCore import QThread, Signal, Qt
+from PySide6.QtGui import QShortcut, QKeySequence
 from openai import OpenAI
 import openai
 from anthropic import Anthropic
@@ -74,7 +74,7 @@ openai_models = config.get("openai_models", {})
 anthropic_models = config.get("anthropic_models", {})
 
 class Worker(QThread):
-    result = pyqtSignal(str)
+    result = Signal(str)
 
     def __init__(self, prompt, model, system):
         super().__init__()
@@ -261,12 +261,12 @@ class GPTApp(QWidget):
         logger.debug(f"original_prompt: {original_prompt}, response_txt: {response_txt}")
 
         if original_prompt and response_txt:
-            new_prompt = f"{original_prompt}\n{deliminator}\n(Your answer):<< {response_txt} >>\n{deliminator}\n"
+            new_prompt = f"{original_prompt}\n{deliminator}\n(Your answer): {response_txt} \n{deliminator}\n"
             self.text_area.setPlainText(new_prompt)
         
         # place the cursor at the end of the text
         cursor = self.text_area.textCursor()
-        cursor.movePosition(cursor.End)
+        cursor.movePosition(cursor.MoveOperation.End) 
         self.text_area.setTextCursor(cursor)
 
     def insert_prompt(self, prompt_text):
@@ -274,7 +274,7 @@ class GPTApp(QWidget):
         logger.debug(f"Prompt inserted: {prompt_text}")
         # auto focus on the last line
         cursor = self.text_area.textCursor()
-        cursor.movePosition(cursor.End)
+        cursor.movePosition(cursor.MoveOperation.End)
         self.text_area.setTextCursor(cursor)
 
 
@@ -282,7 +282,7 @@ def main():
     app = QApplication(sys.argv)
     chatgpt_app = GPTApp()
     chatgpt_app.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()

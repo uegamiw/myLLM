@@ -23,19 +23,19 @@ This simple desktop application allows you to interact with multiple Language Le
 
 1. Clone the repository:
    ```
-   git clone https://github.com/uegamiw/myllm.git
-   cd myllm
+   git clone https://github.com/uegamiw/myLLM.git
+   cd myLLM
    ```
 
 2. Create a virtual environment (optional but recommended):
    ```
-   conda create -n myllm-env python=3.9
+   conda create -n myllm-env python=3.12
    conda activate myllm-env
    ```
 
 3. Install the required packages:
    ```
-   pip install openai anthropic PyQt5 pyinstaller
+   pip install openai anthropic PySide6 pyinstaller
    ```
 
 ## Usage
