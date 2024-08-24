@@ -1,9 +1,8 @@
-import os
 import sys
 from cx_Freeze import setup, Executable
 
 build_exe_options = {
-    "packages": ["os", "sys", "PyQt5", "openai", "anthropic"],
+    "packages": ["os", "sys", "PySide6", "openai", "anthropic"],
     "include_files": [], 
 }
 
