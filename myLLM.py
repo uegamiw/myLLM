@@ -17,59 +17,112 @@ log_path = Path("log/llm_app.log")
 
 deliminator = " ----- "
 
+config_example = """
+<pre>
+    <code>
+{
+    "openai_models": {
+        "GPT3.5":"gpt-3.5-turbo",
+        "GPT4o-mini": "gpt-4o-mini",
+        "GPT4o": "gpt-4o"
+    },
+    "anthropic_models": {
+        "Claude3 Haiku": "claude-3-haiku-20240307",
+        "Claude3 Sonnet": "claude-3-sonnet-20240229",
+        "Claude3.5 Sonnet": "claude-3-5-sonnet-20240620"
+    },
+    "prompts": {
+        "Default": "This is a default prompt."
+        "J2E":"Translate to natural American English.",
+        "Proofread":"Please proofread and revise the following English text to make it sound more natural. Additionally, at the end, explain any grammatical errors or areas for improvement",
+    }
+}
+</code>
+    </pre>
+
+"""
+
 message_missing_openaikey = """
-WARNING: OpenAI API Key is missing. Set the OPENAI_API_KEY environment variable.
 
-1. Get your API key from https://platform.openai.com/account/api-keys
+<h2>WARNING: OpenAI API Key is missing.</h2>
 
-2. Set the API key as an environment variable.
+<ol type="1">
+    <li>Get your API key from https://platform.openai.com/account/api-keys</li>
+    <li>Set the API key as an environment variable.</li>
+</ol>
 
-* MacOS/Linux:
+<h3>MacOS/Linux:</h3>
 in your terminal, run the following command:
+<pre><code>
 export OPENAI_API_KEY="your-api-key"
+</code></pre>
 
-* Windows:
+<h3>Windows:</h3>
 open environment variables and add a new user variable called OPENAI_API_KEY with your API key as the value.
 """
 
 message_missing_anthropickey = """
-WARNING: Anthropic API Key is missing. Set the ANTHROPIC_API_KEY environment variable.
+<h2>WARNING: Anthropic API Key is missing.</h2>
 
-1. Get your API key from https://app.anthropic.com/account/api-keys
+<ol type="1">
+    <li>Get your API key from https://console.anthropic.com/settings/keys</li>
+    <li>Set the API key as an environment variable.</li>
 
-2. Set the API key as an environment variable.
-
-* MacOS/Linux:
+<h3>MacOS/Linux:</h3>
 in your terminal, run the following command:
-export ANTHROPIC_API_KEY="your-api-key"
 
-* Windows:
+<pre><code>
+export ANTHROPIC_API_KEY="your-api-key"
+</code></pre>
+
+<h3>Windows:</h3>
 open environment variables and add a new user variable called ANTHROPIC_API
 """
 
 message_missing_both_keys = """
-FATAL ERROR: Both OpenAI and Anthropic API keys are missing. Set the OPENAI_API_KEY and ANTHROPIC_API_KEY environment variables.
+<h1>FATAL ERROR: Both OpenAI and Anthropic API keys are missing. Set the OPENAI_API_KEY and ANTHROPIC_API_KEY environment variables.</h1>
 
-1. Get your API keys from:
-- OpenAI: https://platform.openai.com/account/api-keys
-- Anthropic: https://app.anthropic.com/account/api-keys
+<ol type="1">
 
-2. Set the API keys as environment variables.
+    <li>Get your API keys from:
+        <ul>
+            <li>OpenAI: https://platform.openai.com/account/api-keys</li>
+            <li>Anthropic: https://app.anthropic.com/account/api-keys</li>
+        </ul>
+    </li>
 
-* MacOS/Linux:
-in your terminal, run the following commands:
-export OPENAI_API_KEY="your-openai-api-key"
-export ANTHROPIC_API_KEY="your-anthropic-api-key"
+    <li>Set the API keys as environment variables.
+        <ul>
+            <li>MacOS/Linux:
+                <p>in your terminal, run the following commands:</p>
+                <p>export OPENAI_API_KEY="your-openai-api-key"</p>
+                <p>export ANTHROPIC_API_KEY="your-anthropic-api-key"</p>
+            </li>
+            <li>Windows:
+                <p>open environment variables and add new user variables called OPENAI_API_KEY and ANTHROPIC_API_KEY with your API keys as the values.</p>
+            </li>
+        </ul>
+        """
 
-* Windows:
-open environment variables and add new user variables called OPENAI_API_KEY and ANTHROPIC_API_KEY with your API keys as the values.
-
-"""
 
 error_message_missing_config = """
-Conifg.json file is missing or corrupted. Place the config.json file in the same directory as the app.
-See github.com/uegamiw/myLLM for more information.
-"""
+<p>Conifg.json file is missing or corrupted. Place the config.json file in the same directory as the app.
+See github.com/uegamiw/myLLM for more information.</p>
+
+Following is the example of the config.json file:
+""" + config_example
+
+error_missing_prompts = """
+<h1>ERROR: No prompts found in the config.json file.</h1>
+
+<p>Place the prompt templates in the config.json file. See the example below:</p>
+""" + config_example
+
+error_missing_models = """
+<h1>ERROR: No models found in the config.json file.</h1>
+<p>Place the model names and IDs in the config.json file. See the example below:</p>
+""" + config_example
+
 
 welcome_message = """
 <h1> Welcome to myLLM! </h1>
@@ -102,7 +155,6 @@ class model_clients:
         self.logger = logger
 
     def get_model_clients(self):
-
         try:
             self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
             self.logger.info(f"OpenAI client initialized")
@@ -114,13 +166,21 @@ class model_clients:
             self.logger.error(f"API Key Error (OpenAI): {e}")
 
         try:
-            self.anthropic_client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+            self.anthropic_client = Anthropic(api_key=api_key)
+
+            if api_key is None:
+                self.anthropic_client = None
+                self.logger.error(f"Anthropic client not initialized")
+            else:
+                self.logger.info(f"Anthropic client initialized")
         
         except KeyError as e:
             self.logger.error(f"API Key Error (Anthropic): {e}")
 
         except Exception as e:
             self.logger.error(f"API Key Error (Anthropic): {e}")
+
 
 
 def load_config(json_path:Path, logger) -> dict:
@@ -131,14 +191,14 @@ def load_config(json_path:Path, logger) -> dict:
             logger.info(f"config.json loaded")
 
     except FileNotFoundError as e:
-        logger.error(f"FileNotFoundError: {e}")
+        logger.critical(f"FileNotFoundError: {e}")
         config = {}
 
     except json.JSONDecodeError as e:
-        logger.error(f"JSONDecodeError: {e}")
+        logger.critical(f"JSONDecodeError: {e}")
         config = {}
     except Exception as e:
-        logger.error(f"Unexpected Error: {e}")
+        logger.critical(f"Unexpected Error: {e}")
         config = {}
     
     return config
@@ -344,7 +404,7 @@ class GPTApp(QWidget):
             self.output_area.setHtml(f"<font color='red'>Error: {error_message_missing_config}</font>")
             disable_buttons()
 
-        elif not self.openai_clients and not self.anthropic_clients:
+        elif (not self.openai_clients) and (not self.anthropic_clients):
             self.output_area.setHtml(f"<font color='red'>Error: {message_missing_both_keys}</font>")
             disable_buttons()
 
@@ -356,11 +416,11 @@ class GPTApp(QWidget):
                 self.output_area.setHtml(f"<font color='red'>Error: {message_missing_anthropickey}</font>")
             
             elif not self.openai_models and not self.anthropic_models:
-                self.output_area.setHtml(f"<font color='red'>Error: No models found in the config.json file</font>")
+                self.output_area.setHtml(f"<font color='red'>{error_missing_models}</font>")
                 disable_buttons()
             
             elif not self.prompts:
-                self.output_area.setHtml(f"<font color='red'>Error: No prompts found in the config.json file</font>")
+                self.output_area.setHtml(f"<font color='red'>{error_missing_prompts}</font>")
             
             else:
                 self.output_area.setHtml(welcome_message)
