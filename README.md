@@ -73,7 +73,7 @@ Download the appropriate binary for your operating system from the releases page
 ## Usage
 
 1. Run the application:
-   - If using the Python script: `python main.py`
+   - If using the Python script: `python myLLM.py`
    - If using the binary: Double-click the executable file
 
 2. The main window will open with the following components:
@@ -95,6 +95,7 @@ Download the appropriate binary for your operating system from the releases page
 ### Shortcuts
 
 - Prompt template buttons: Ctrl+1, Ctrl+2, ...
+- Clear prompt: Ctrl+0
 - Model selection: Ctrl+Alt+1, Ctrl+Alt+2, ...
 - Send: Ctrl+Return (Cmd+Return on Mac)
 - Append: Alt+Return

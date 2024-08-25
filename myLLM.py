@@ -4,7 +4,7 @@ from logging import getLogger, Formatter, DEBUG, INFO, WARNING, ERROR, StreamHan
 from logging.handlers import RotatingFileHandler
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton, QProgressBar, QRadioButton, QButtonGroup, QHBoxLayout, QLineEdit, QSplitter
 from PySide6.QtCore import QThread, Signal, Qt
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtGui import QShortcut, QKeySequence, QKeyEvent
 from openai import OpenAI
 import openai
 from anthropic import Anthropic
@@ -143,9 +143,12 @@ Keep the config.json file in the same directory as the app.
 <h2> Shortcuts </h2>
 <ul>
     <li> Prompt buttons: Ctrl+1, Ctrl+2, ...</li>
+    <li> Clear input area: Ctrl+0</li>
     <li> Model radio buttons: Ctrl+Alt+1, Ctrl+Alt+2, ...</li>
     <li> Send button: Ctrl+Return</li>
     <li> ↑ button: Alt+Return</li>
+    <li> Zoom in: Ctrl++</li>
+    <li> Zoom out: Ctrl+-</li>
 </ul>
 
 <h2> Logging </h2>
@@ -209,8 +212,32 @@ def load_config(json_path:Path, logger) -> dict:
     
     return config
 
+class TextEditWithZoom(QTextEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.defaultFontSize = self.font().pointSize()
 
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.modifiers() == Qt.ControlModifier:
+            if event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:
+                self.zoomIn()
+                return
+            elif event.key() == Qt.Key_Minus:
+                self.zoomOut()
+                return
+        super().keyPressEvent(event)
 
+    def zoomIn(self, range=1):
+        font = self.font()
+        font.setPointSize(font.pointSize() + range)
+        self.setFont(font)
+
+    def zoomOut(self, range=1):
+        font = self.font()
+        newSize = font.pointSize() - range
+        if newSize > 0:  # Prevent the font size from becoming negative or too small
+            font.setPointSize(newSize)
+            self.setFont(font)
 
 class Worker(QThread):
     result = Signal(str)
@@ -338,8 +365,13 @@ class GPTApp(QWidget):
         main_layout.addWidget(self.text_box)
         
         # Input area for the prompt
-        self.text_area = QTextEdit(self, placeholderText="Enter your prompt here")
+        # self.text_area = QTextEdit(self, placeholderText="Enter your prompt here")
+        self.text_area = TextEditWithZoom(self, placeholderText="Enter your prompt here")
         main_layout.addWidget(self.text_area)
+
+        # shortcut ctrl + 0 for clearing the input text area
+        shortcut = QShortcut(QKeySequence("Ctrl+0"), self)
+        shortcut.activated.connect(lambda: self.text_area.clear())
 
         # size grip size_grip = QSizeGrip(self) main_layout.addWidget(size_grip, alignment=Qt.AlignBottom | Qt.AlignRight)
 
@@ -392,8 +424,8 @@ class GPTApp(QWidget):
         main_layout.addWidget(self.progress_bar)
 
         # Output Area
-        self.output_area = QTextEdit(self)
-        self.output_area.setReadOnly(True)
+        self.output_area = TextEditWithZoom(self)
+        # self.output_area.setReadOnly(True)
         main_layout.addWidget(self.output_area)
         self.setLayout(main_layout)
 
@@ -407,7 +439,7 @@ class GPTApp(QWidget):
         mac_shortcut = QShortcut(QKeySequence("Meta+Return"), self)
         mac_shortcut.activated.connect(self.on_send)
 
-        ## Apped button (Alt+Return)
+        ## Append button (Alt+Return)
         shortcut2 = QShortcut(QKeySequence("Alt+Return"), self)
         shortcut2.activated.connect(self.on_append)
 
