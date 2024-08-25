@@ -2,7 +2,7 @@ import os
 import sys
 from logging import getLogger, Formatter, DEBUG, INFO, WARNING, ERROR, StreamHandler
 from logging.handlers import RotatingFileHandler
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton, QProgressBar, QRadioButton, QButtonGroup, QHBoxLayout, QLineEdit
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton, QProgressBar, QRadioButton, QButtonGroup, QHBoxLayout, QLineEdit, QSplitter
 from PySide6.QtCore import QThread, Signal, Qt
 from PySide6.QtGui import QShortcut, QKeySequence
 from openai import OpenAI
@@ -131,15 +131,22 @@ welcome_message = """
     <li> (optional) Select a prompt template from the buttons above.</li>
     <li> Enter your prompt in the text area.</li>
     <li> Select a model from the radio buttons.</li>
-    <li> Click the 'Send' button or press 'Ctrl+Return' to generate a response.</li>
+    <li> Click the 'Send' button to generate a response.</li>
     <li> The response will be displayed in the output area.</li>
-    <li> Click the 'Append' button or press 'Alt+Return' to append the response to the prompt.</li>
+    <li> Click the 'Append' button to append the response to the prompt.</li>
 </ol>
-
 
 <h2> config.json </h2>
 You can customize the models and prompts by editing the config.json file. <br>
 Keep the config.json file in the same directory as the app.
+
+<h2> Shortcuts </h2>
+<ul>
+    <li> Prompt buttons: Ctrl+1, Ctrl+2, ...</li>
+    <li> Model radio buttons: Ctrl+Alt+1, Ctrl+Alt+2, ...</li>
+    <li> Send button: Ctrl+Return</li>
+    <li> ↑ button: Alt+Return</li>
+</ul>
 
 <h2> Logging </h2>
 The app logs and all input/responses are saved in the log directory. Check the log file for more information. <br>
@@ -180,7 +187,6 @@ class model_clients:
 
         except Exception as e:
             self.logger.error(f"API Key Error (Anthropic): {e}")
-
 
 
 def load_config(json_path:Path, logger) -> dict:
@@ -303,18 +309,22 @@ class GPTApp(QWidget):
 
         # Prompt shortcuts buttons
         if self.prompts:
-            for prompt_name, prompt_text in self.prompts.items():
+            for i, (prompt_name, prompt_text) in enumerate(self.prompts.items()):
                 self.logger.debug(f"Prompt loaded: {prompt_name}")
                 prompt_text = f"{prompt_text} \n {deliminator} \n"
                 self.logger.debug(f"Prompt text: {prompt_text}")
 
-                button = QPushButton(prompt_name, self)
+                button = QPushButton(f"{prompt_name}", self)
 
                 # button.clicked.connect(lambda p=prompt_text: self.insert_prompt(p))
                 def on_button_clicked(checked=False, p=prompt_text):
                     self.insert_prompt(p)
                 # button.clicked.connect(lambda checked, p=prompt_text: self.insert_prompt(p))
                 button.clicked.connect(on_button_clicked)
+
+                # shortcut: command + i
+                shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
+                shortcut.activated.connect(on_button_clicked)
 
                 preset_layout.addWidget(button)
 
@@ -331,17 +341,20 @@ class GPTApp(QWidget):
         self.text_area = QTextEdit(self, placeholderText="Enter your prompt here")
         main_layout.addWidget(self.text_area)
 
+        # size grip size_grip = QSizeGrip(self) main_layout.addWidget(size_grip, alignment=Qt.AlignBottom | Qt.AlignRight)
+
         # Radio buttons for model selection
         self.model_group = QButtonGroup(self)
         model_layout = QHBoxLayout()
-        
+
+        # Place the radio buttons for the models (OpenAI)
         if self.openai_clients is not None:
             for openai_model in self.openai_models.keys():
-                self.logger.info(f"OpenAI model loaded: {openai_model}")
                 openai_button = QRadioButton(openai_model, self)
                 model_layout.addWidget(openai_button)
                 self.model_group.addButton(openai_button)
 
+        # Place the radio buttons for the models (Anthropic)
         if self.anthropic_clients is not None:
             for anthropic_model in self.anthropic_models.keys():
                 self.logger.info(f"Anthropic model loaded: {anthropic_model}")
@@ -355,16 +368,21 @@ class GPTApp(QWidget):
         if len(self.model_group.buttons()) > 0:
             self.model_group.buttons()[0].setChecked(True)
 
+            # set shortcut (Ctrl+Alt+1, Ctrl+Alt+2, ...)
+            for i, button in enumerate(self.model_group.buttons()):
+                shortcut = QShortcut(QKeySequence(f"Ctrl+Alt+{i+1}"), self)
+                shortcut.activated.connect(lambda b=button: b.setChecked(True))
+
         # button layout
         button_layout = QHBoxLayout()
 
         # Send button
-        self.send_button = QPushButton("Send (Cmd+Enter)", self)
+        self.send_button = QPushButton("Send", self)
         self.send_button.clicked.connect(self.on_send)
         button_layout.addWidget(self.send_button)
 
         # Append button
-        self.append_button = QPushButton("Append (Alt+Enter)", self)
+        self.append_button = QPushButton("↑", self)
         self.append_button.clicked.connect(self.on_append)
         button_layout.addWidget(self.append_button)
         main_layout.addLayout(button_layout)
@@ -401,26 +419,26 @@ class GPTApp(QWidget):
         
         
         if not self.config:
-            self.output_area.setHtml(f"<font color='red'>Error: {error_message_missing_config}</font>")
+            self.output_area.setHtml(f"<font color='red'>Error: {error_message_missing_config}</font> {welcome_message}")
             disable_buttons()
 
         elif (not self.openai_clients) and (not self.anthropic_clients):
-            self.output_area.setHtml(f"<font color='red'>Error: {message_missing_both_keys}</font>")
+            self.output_area.setHtml(f"<font color='red'>Error: {message_missing_both_keys}</font> {welcome_message}")
             disable_buttons()
 
         else:
             if not self.openai_clients:
-                self.output_area.setHtml(f"<font color='red'>Error: {message_missing_openaikey}</font>")
+                self.output_area.setHtml(f"<font color='red'>Error: {message_missing_openaikey}</font> {welcome_message}")
             
             elif not self.anthropic_clients:
-                self.output_area.setHtml(f"<font color='red'>Error: {message_missing_anthropickey}</font>")
+                self.output_area.setHtml(f"<font color='red'>Error: {message_missing_anthropickey}</font> {welcome_message}")
             
             elif not self.openai_models and not self.anthropic_models:
-                self.output_area.setHtml(f"<font color='red'>{error_missing_models}</font>")
+                self.output_area.setHtml(f"<font color='red'>{error_missing_models}</font> {welcome_message}")
                 disable_buttons()
             
             elif not self.prompts:
-                self.output_area.setHtml(f"<font color='red'>{error_missing_prompts}</font>")
+                self.output_area.setHtml(f"<font color='red'>{error_missing_prompts}</font> {welcome_message}")
             
             else:
                 self.output_area.setHtml(welcome_message)
