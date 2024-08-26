@@ -187,6 +187,33 @@ class GPTApp(QWidget):
         self.setWindowTitle("myLLM")
         self.setGeometry(100, 100, 800, 950)
 
+        main_layout = QVBoxLayout(self)
+        self.menubar = QMenuBar(self)
+        main_layout.setMenuBar(self.menubar)
+        
+        self.setup_menu()
+        self.setup_prompt_buttons(main_layout)
+        self.setup_text_inputs(main_layout)
+        self.setup_model_selection(main_layout)
+        self.setup_action_buttons(main_layout)
+        self.setup_progress_bar(main_layout)
+        self.setup_output_area(main_layout)
+        
+        self.setLayout(main_layout)
+        self.setup_shortcuts()
+        self.check_configuration()
+
+        self.text_area.setFocus()
+
+    def setup_menu(self):
+        prompt_menu = QMenu("Prompts", self)
+        self.menubar.addMenu(prompt_menu)
+        if self.prompts:
+            for prompt_name, prompt_text in self.prompts.items():
+                action = prompt_menu.addAction(prompt_name)
+                action.triggered.connect(lambda checked=False, p=prompt_text: self.insert_prompt(p))
+
+    def setup_prompt_buttons(self, layout):
         main_layout = QVBoxLayout()
         
         self.setup_menu()
