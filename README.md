@@ -1,6 +1,6 @@
 # myLLM
 
-myLLM is a desktop application that allows users to interact with various language models from OpenAI and Anthropic. It provides a simple interface for sending prompts and receiving responses from these AI models.
+myLLM is a simple desktop application that allows users to interact with various language models from OpenAI and Anthropic. The application supports multiple models and prompt templates, making it easy to switch between different configurations.
 
 ## Installation
 
@@ -30,6 +30,8 @@ Download the appropriate binary for your operating system from the releases page
 ## Configuration
 
 1. Create a `config.json` file in the same directory as the application with the following structure:
+   - `openai_models` and `anthropic_models` should contain the model names and their corresponding IDs. The model names will be displayed in the application's model selection radio buttons.
+   - `prompts` should contain the prompt names and their corresponding text. The first 6 prompt names will be displayed as buttons at the top of the application, with the rest available in a dropdown menu.
 
 ```json
 {
@@ -50,6 +52,7 @@ Download the appropriate binary for your operating system from the releases page
     }
 }
 ```
+
 
 2. Obtain API keys:
    - OpenAI API key: https://platform.openai.com/account/api-keys
