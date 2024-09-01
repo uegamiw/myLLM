@@ -29,9 +29,28 @@ Download the appropriate binary for your operating system from the releases page
 
 ## Configuration
 
-1. Create a `config.json` file in the same directory as the application with the following structure:
-   - `openai_models` and `anthropic_models` should contain the model names and their corresponding IDs. The model names will be displayed in the application's model selection radio buttons.
-   - `prompts` should contain the prompt names and their corresponding text. The first 6 prompt names will be displayed as buttons at the top of the application, with the rest available in a dropdown menu.
+1. Obtain API keys:
+   - OpenAI API key: https://platform.openai.com/account/api-keys
+   - Anthropic API key: https://console.anthropic.com/settings/keys
+
+2. Set environment variables:
+
+   For MacOS/Linux:
+   ```
+   export OPENAI_API_KEY="your-openai-api-key"
+   export ANTHROPIC_API_KEY="your-anthropic-api-key"
+   ```
+
+   For Windows:
+   1. Open the Start menu and search for "Environment Variables"
+   2. Click "Edit the system environment variables"
+   3. Click the "Environment Variables" button
+   4. Under "User variables", click "New"
+   5. Add `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` with their respective values
+
+3. When the app launches for the first time, a `config.json` file will be automatically created with default values if it doesn't already exist. Edit the `config.json` file to include the model names and IDs you want to use in the application. The model names will be displayed as options in the application's model selection radio buttons. Additionally, you can add prompt templates to the `prompts` section.
+
+Example `config.json` file:
 
 ```json
 {
@@ -52,26 +71,6 @@ Download the appropriate binary for your operating system from the releases page
     }
 }
 ```
-
-
-2. Obtain API keys:
-   - OpenAI API key: https://platform.openai.com/account/api-keys
-   - Anthropic API key: https://console.anthropic.com/settings/keys
-
-3. Set environment variables:
-
-   For MacOS/Linux:
-   ```
-   export OPENAI_API_KEY="your-openai-api-key"
-   export ANTHROPIC_API_KEY="your-anthropic-api-key"
-   ```
-
-   For Windows:
-   1. Open the Start menu and search for "Environment Variables"
-   2. Click "Edit the system environment variables"
-   3. Click the "Environment Variables" button
-   4. Under "User variables", click "New"
-   5. Add `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` with their respective values
 
 ## Usage
 

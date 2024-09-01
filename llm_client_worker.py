@@ -5,19 +5,18 @@ import anthropic
 class Worker(QThread):
     result = Signal(str)
 
-    def __init__(self, prompt, model, system, logger):
+    def __init__(self, prompt, model, logger):
         super().__init__()
         self.prompt = prompt
         self.model = model
-        self.system = system
         self.logger = logger
 
     def run(self):
         pass
 
 class OpenAIWorker(Worker):
-    def __init__(self, prompt, model, system, openai_client, logger):
-        super().__init__(prompt, model, system, logger)
+    def __init__(self, prompt, model, openai_client, logger):
+        super().__init__(prompt, model, logger)
         self.openai_client = openai_client
 
     def run(self):
@@ -43,15 +42,15 @@ class OpenAIWorker(Worker):
             self.logger.error(f"Unexpected Error: {e}")
 
 class AnthropicWorker(Worker):
-    def __init__(self, prompt, model, system, anthropic_client, logger):
-        super().__init__(prompt, model, system, logger)
+    def __init__(self, prompt, model, anthropic_client, logger):
+        super().__init__(prompt, model, logger)
         self.anthropic_client = anthropic_client
 
     def run(self):
         try:
             response = self.anthropic_client.messages.create(
                 max_tokens=2048,
-                system=self.system,
+                system='user',
                 messages=[
                     {
                         "role": 'user',

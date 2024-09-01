@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import Signal
 from ui.text_edit_with_zoom import TextEditWithZoom
 from setting import deliminator
@@ -13,11 +13,8 @@ class PromptInputPanel(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         self.setLayout(layout)
-
-        self.textbox = QLineEdit(
-            self, placeholderText="Claude only. Enter the system (role) here."
-        )
-        layout.addWidget(self.textbox)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.textarea = TextEditWithZoom(self, placeholderText="Enter prompt here.")
         layout.addWidget(self.textarea)
@@ -29,12 +26,14 @@ class PromptInputPanel(QWidget):
             self.textarea.append_text(f"{text} \n")
 
     def clear_text(self):
-        self.textbox.clear()
         self.textarea.clear()
 
     def set_disabled(self):
         self.textarea.setReadOnly(True)
-        self.textbox.setDisabled(True)
 
     def get_text(self):
-        return self.textbox.text(), self.textarea.toPlainText()
+        return self.textarea.toPlainText()
+
+    def set_text(self, text):
+        self.textarea.clear()
+        self.textarea.setPlainText(text)

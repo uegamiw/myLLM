@@ -15,6 +15,8 @@ class PromptButtonsPanel(QWidget):
     def init_ui(self):
         layout = QHBoxLayout()
         self.setLayout(layout)
+        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         for i, (prompt_name, prompt_text) in enumerate(self.prompts.items()):
             if i > 4:

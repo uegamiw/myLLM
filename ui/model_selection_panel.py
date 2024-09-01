@@ -1,10 +1,13 @@
-from PySide6.QtWidgets import QHBoxLayout, QRadioButton, QButtonGroup
+from PySide6.QtWidgets import QHBoxLayout, QRadioButton, QButtonGroup, QWidget
 from PySide6.QtGui import QShortcut, QKeySequence
 
-class ModelSelectionPanel(QHBoxLayout):
+class ModelSelectionPanel(QWidget):
     def __init__(self, openai_models, anthropic_models):
         super().__init__()
         self.model_group = QButtonGroup()
+
+        self.layout = QHBoxLayout(self)
+        self.setLayout(self.layout)
 
         if openai_models:
             self.add_model_buttons(openai_models)
@@ -21,9 +24,15 @@ class ModelSelectionPanel(QHBoxLayout):
     def add_model_buttons(self, models):
         for model in models.keys():
             button = QRadioButton(model)
-            self.addWidget(button)
+            self.layout.addWidget(button)
             self.model_group.addButton(button)
 
     def selected_model(self):
         button = self.model_group.checkedButton()
         return button.text() if button else None
+    
+    def set_selected_model(self, model_name):
+        for button in self.model_group.buttons():
+            if button.text() == model_name:
+                button.setChecked(True)
+                break

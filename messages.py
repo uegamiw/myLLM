@@ -19,8 +19,8 @@ config_example = """
         "Proofread":"Please proofread and revise the following English text to make it sound more natural. Additionally, at the end, explain any grammatical errors or areas for improvement",
     }
 }
-</code>
-    </pre>
+    </code>
+</pre>
 
 """
 
@@ -108,6 +108,7 @@ error_missing_models = """
 
 
 welcome_message = """
+<font color='gray'>
 <h1> Welcome to myLLM! </h1>
 <h2> How to use</h2>
 <ol type="1">
@@ -116,7 +117,7 @@ welcome_message = """
     <li> Select a model from the radio buttons.</li>
     <li> Click the 'Send' button to generate a response.</li>
     <li> The response will be displayed in the output area.</li>
-    <li> Click the 'Append' button to append the response to the prompt.</li>
+    <li> Click the '↑' button to append the response to the prompt.</li>
 </ol>
 
 <h2> config.json </h2>
@@ -138,4 +139,12 @@ Keep the config.json file in the same directory as the app.
 The app logs and all input/responses are saved in the log directory. Check the log file for more information. <br>
 
 Author: Wataru Uegami, MD PhD (wuegami@gmail.com)
+</font>
+"""
+
+loading_message = """
+<font color='gray'>
+<h1>Loading...</h1>
+<p>Fetching the response from the API. This may take a few seconds.</p>
+</font>
 """

@@ -23,5 +23,4 @@ class MenuBar(QMenuBar):
                 self.logger.debug(f"Added prompt to the menubar: {prompt_name}")
 
     def insert_prompt(self, prompt_text):
-        # raise NotImplementedError("insert_prompt method must be implemented in the parent class.")
         self.prompt_selected.emit(prompt_text)
