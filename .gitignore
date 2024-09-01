@@ -5,3 +5,7 @@ build/
 build/
 config.json
 *.db
+*.exe
+*.plist
+*.png
+Resources/

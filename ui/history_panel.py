@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, 
-                               QScrollArea, QHeaderView)
+                               QScrollArea, QHeaderView, QHBoxLayout, QLineEdit)
 from PySide6.QtCore import Signal
 from setting import n_history
+from PySide6.QtGui import QShortcut, QKeySequence
 
 class CustomTableWidget(QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -22,6 +23,16 @@ class HistoryPanel(QWidget):
         self.db_manager = db_manager
         self.logger = logger
 
+        # search
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search (Ctrl+f)")
+        self.search_input.textChanged.connect(self.on_search_input_changed)
+        search_layout.addWidget(self.search_input)
+
+        self.layout.addLayout(search_layout)
+
+        # table
         self.table_widget = CustomTableWidget()
         self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(['ID', 'Query', 'Response', 'Model', 'Del'])
@@ -42,6 +53,23 @@ class HistoryPanel(QWidget):
         self.layout.addWidget(scroll_area)
 
         self.populate_table_from_db()
+
+        QShortcut(QKeySequence("Ctrl+f"), self).activated.connect(self.search_input.setFocus)
+
+
+    def on_search_input_changed(self):
+        search_text = self.search_input.text()
+        if search_text:
+            search_results = self.db_manager.search(search_text)
+            self.populate_table_with_results(search_results)
+        else:
+            self.populate_table_from_db()
+
+    def populate_table_with_results(self, items):
+        self.table_widget.clearContents()
+        self.table_widget.setRowCount(len(items))
+        for row, item in enumerate(items):
+            self.add_item_to_table(row, item)
 
     def populate_table_from_db(self):
         items = self.db_manager.get_n_history(n_history)
@@ -72,3 +100,5 @@ class HistoryPanel(QWidget):
         self.table_widget.clearContents()
         self.table_widget.setRowCount(0)
         self.populate_table_from_db()
+
+    

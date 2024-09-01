@@ -115,3 +115,22 @@ class DatabaseManager(QObject):
     def close(self):
         if self.conn:
             self.conn.close()
+
+    # function that, given a word X, searches for queries and responses containing partial matches to X. It should return the 100 most recent results, ordered from newest to oldest date.
+    def search(self, word):
+        search_query = "SELECT * FROM history WHERE query LIKE ? OR response LIKE ? ORDER BY datetime DESC LIMIT 100"
+        try:
+            self.cursor.execute(search_query, (f"%{word}%", f"%{word}%"))
+            items = []
+            for item in self.cursor.fetchall():
+                items.append({
+                    "id": item[0],
+                    "query": item[1],#[0:query_min_length],
+                    "response": item[2],#[0:response_min_length],
+                    "datetime": item[3],
+                    "model": item[4]
+                })
+            return items
+        except sqlite3.Error as e:
+            self.logger.error(f"Error fetching data: {e}")
+            return []
