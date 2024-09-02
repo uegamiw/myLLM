@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTextEdit, QWidget, QVBoxLayout, QSizeGrip
 from PySide6.QtGui import QKeyEvent
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QMimeData
 
 class TextEditWithZoom(QTextEdit):
     def __init__(self, *args, **kwargs):
@@ -37,6 +37,13 @@ class TextEditWithZoom(QTextEdit):
             # self.moveCursor(Qt.CursorMovement.End)
             self.insertPlainText(text)
 
+    # Paste as plain text (abort the style of the copied text)
+    def insertFromMimeData(self, source: QMimeData):
+        if source.hasText():
+            self.insertPlainText(source.text())
+        else:
+            super().insertFromMimeData(source)
+
 class ResizableTextEdit(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,6 +59,3 @@ class ResizableTextEdit(QWidget):
         super().resizeEvent(event)
         self.size_grip.move(self.width() - self.size_grip.width(),
                             self.height() - self.size_grip.height())
-
-    # def sizeHint(self):
-    #     return QSize(300, 200)  # デフォルトサイズを設定
