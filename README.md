@@ -4,7 +4,11 @@ myLLM is a simple desktop application that allows users to interact with various
 
 ## Installation
 
-### Option 1: Running the Python Script
+### Option 1: Using the Distributed Binary
+
+Download the appropriate binary (exe) from the [release page](https://github.com/uegamiw/myLLM/releases).
+
+### Option 2: Running the Python Script
 
 1. Clone the repository:
    ```
@@ -20,12 +24,8 @@ myLLM is a simple desktop application that allows users to interact with various
 
 3. Install the required packages:
    ```
-   pip install -r openai anthropic PySide6 pyinstaller
+   pip install -r openai anthropic PySide6
    ```
-
-### Option 2: Using the Distributed Binary
-
-Download the appropriate binary for your operating system from the releases page.
 
 ## Configuration
 
@@ -48,7 +48,7 @@ Download the appropriate binary for your operating system from the releases page
    4. Under "User variables", click "New"
    5. Add `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` with their respective values
 
-3. When the app launches for the first time, a `config.json` file will be automatically created with default values if it doesn't already exist. Edit the `config.json` file to include the model names and IDs you want to use in the application. The model names will be displayed as options in the application's model selection radio buttons. Additionally, you can add prompt templates to the `prompts` section.
+3. When the app launches for the first time, a `config.json` file will be automatically created with default values if it doesn't already exist. Edit the `config.json` file to include the model names and IDs you want to use in the application. The model names will be displayed as options in the application's model selection radio buttons. Additionally, you can add/edit prompt templates to the `prompts` section. The first 5 prompts will be displayed as buttons at the top of the application.
 
 Example `config.json` file:
 
@@ -77,22 +77,12 @@ Example `config.json` file:
 1. Run the application:
    - If using the Python script: `python myLLM.py`
    - If using the binary: Double-click the executable file
-
-2. The main window will open with the following components:
-   - Prompt template buttons
-   - System message input (for Claude models)
-   - Prompt input area
-   - Model selection radio buttons
-   - Send and Append buttons
-   - Progress bar
-   - Response output area
-
-3. (Optional) Select a prompt template using the buttons at the top
-4. Enter your prompt in the text area
-5. Select a model using the radio buttons
-6. Click "Send" or use the shortcut (Ctrl+Return or Cmd+Return) to generate a response
-7. The response will appear in the output area
-8. Use the "Append" button (↑) or Alt+Return to add the response to your prompt for continued conversation
+2. (Optional) Select a prompt template using the buttons at the top
+3. Enter your prompt in the text area
+4. Select a model using the radio buttons
+5. Click "Send" or use the shortcut (Ctrl+Return or Cmd+Return) to generate a response
+6. The response will appear in the output area
+7. Use the "Append" button (↑) or Alt+Return to add the response to your prompt for continued conversation
 
 ### Shortcuts
 
@@ -101,14 +91,11 @@ Example `config.json` file:
 - Model selection: Ctrl+Alt+1, Ctrl+Alt+2, ...
 - Send: Ctrl+Return (Cmd+Return on Mac)
 - Append: Alt+Return
-
-## Logging
-
-Logs are generated in the `log` directory, with the main log file named `llm_app.log`. This file contains information about the application's operation, including any errors or warnings.
+- Focus on prompt text area: Ctrl+L
+- Focus on the search box: Ctrl+F
 
 ## Troubleshooting
 
 1. If you encounter a "Missing API Key" error, ensure that you've properly set the environment variables for your API keys.
-2. If the `config.json` file is missing or corrupted, you'll see an error message in the application. Make sure the file exists and is properly formatted.
-3. If no models or prompts are found, check your `config.json` file to ensure it contains the correct structure and data.
-4. For any other issues, check the log file (`log/llm_app.log`) for more detailed error messages and information.
+2. If the `config.json` file is corrupted, you'll see an error message in the application. Make sure the file exists and is properly formatted.
+3. For any other issues, check the log file (`log/llm_app.log`) for more detailed error messages and information.

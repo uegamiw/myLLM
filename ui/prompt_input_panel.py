@@ -17,6 +17,16 @@ class PromptInputPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.textarea = TextEditWithZoom(self, placeholderText="Enter prompt here.")
+
+        self.textarea.setStyleSheet("""
+            QTextEdit {
+                border: 1px solid gray;
+                padding: 5px;
+            }
+            QTextEdit:focus {
+                border: 2px solid blue;
+            }
+        """)
         layout.addWidget(self.textarea)
 
     def append_text(self, text:str, deliminator:str=deliminator):

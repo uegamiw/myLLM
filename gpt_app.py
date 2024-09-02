@@ -1,7 +1,9 @@
 from PySide6.QtWidgets import (
     QWidget,
-    QHBoxLayout
+    QHBoxLayout,
+    QSplitter,
 )
+from PySide6.QtCore import Qt
 from ui.menu_bar import MenuBar
 from ui.history_panel import HistoryPanel
 from ui.main_panel import MainPanel
@@ -34,25 +36,32 @@ class GPTApp(QWidget):
         main_layout = QHBoxLayout(self)
         main_layout.setSpacing(0)
         
+        # Create a splitter
+        splitter = QSplitter(Qt.Horizontal)
+
         # history panel
         self.history_panel = HistoryPanel(self.db_manager, self.logger)
         self.history_panel.item_selected.connect(self.show_history_item)
 
         # main_panel
-        self.main_panel = MainPanel(self.config, self.clients,self.history_panel, self.logger)
+        self.main_panel = MainPanel(self.config, self.clients, self.history_panel, self.logger)
 
-        main_layout.addWidget(self.history_panel)
-        main_layout.addWidget(self.main_panel)
+        # Add panels to the splitter
+        splitter.addWidget(self.history_panel)
+        splitter.addWidget(self.main_panel)
+
+        # Set initial sizes (optional)
+        splitter.setSizes([350, 600])  # Example: history panel 300px, main panel 900px
+
+        main_layout.addWidget(splitter)
 
         # Menu bar
         self.menubar = MenuBar(self, self.prompts, self.logger)
         main_layout.setMenuBar(self.menubar)
         self.menubar.prompt_selected.connect(self.main_panel.insert_prompt)
 
-
         self.setLayout(main_layout)
         self.main_panel.prompt_input_panel.textarea.setFocus()
-        
     
     def show_history_item(self, item):
         self.main_panel.prompt_input_panel.set_text(item['query'])

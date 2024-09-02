@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMenuBar, QMenu
 from PySide6.QtCore import Signal
-from setting import deliminator
+from setting import deliminator, n_prompt_buttons
 
 class MenuBar(QMenuBar):
     prompt_selected = Signal(str)
@@ -15,9 +15,12 @@ class MenuBar(QMenuBar):
         self.addMenu(prompt_menu)
 
         if self.prompts:
-            for prompt_name, prompt_text in self.prompts.items():
+            for i, (prompt_name, prompt_text) in enumerate(self.prompts.items()):
                 prompt_text = f"{prompt_text} \n {deliminator} \n"
 
+                if i+1 <= n_prompt_buttons:
+                    prompt_name = f"{prompt_name} (Ctrl+{i+1})"
+                
                 action = prompt_menu.addAction(prompt_name)
                 action.triggered.connect(lambda checked=False, p=prompt_text: self.insert_prompt(p))
                 self.logger.debug(f"Added prompt to the menubar: {prompt_name}")

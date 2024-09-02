@@ -11,15 +11,15 @@ from ui.action_button_panel import ActionButtonsPanel
 from ui.output_area import OutputArea
 from llm_client_worker import OpenAIWorker, AnthropicWorker
 from api_client_manager import APIClientManager
-from setting import deliminator, window_title, db_path
+from setting import deliminator, window_title, db_path, response_prefix
 import database
-
 
 class MainPanel(QWidget):
     def __init__(self,config, clients:APIClientManager, history_panel, logger):
         super().__init__()
         self.layout = QVBoxLayout(self)
-        self.layout.setSpacing(1)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.config = config
 
         self.openai_clients = clients.openai_client
@@ -58,10 +58,6 @@ class MainPanel(QWidget):
         self.action_buttons_panel.send_signal.connect(self.handle_send)
         self.action_buttons_panel.append_signal.connect(self.handle_append)
         self.layout.addWidget(self.action_buttons_panel)
-
-        # Progress bar
-        # self.progress_bar = ProgressBar()
-        # self.layout.addWidget(self.progress_bar)
 
         # Output area
         self.output_area = OutputArea()
@@ -125,7 +121,7 @@ class MainPanel(QWidget):
         )
 
         if response_txt:
-            new_prompt = f"{original_prompt}\n{deliminator}\n[Model's response]: {response_txt} \n{deliminator}\n"
+            new_prompt = f"{original_prompt}\n{deliminator}\n{response_prefix} {response_txt} \n{deliminator}\n"
             self.prompt_input_panel.textarea.setPlainText(new_prompt)
 
         # place the cursor at the end of the text
@@ -148,6 +144,14 @@ class MainPanel(QWidget):
         QShortcut(QKeySequence("Meta+Return"), self).activated.connect(self.handle_send)
         QShortcut(QKeySequence("Alt+Return"), self).activated.connect(self.handle_append)
         QShortcut(QKeySequence("Ctrl+0"), self).activated.connect(self.clear_textboxes)
+        QShortcut(QKeySequence("Ctrl+l"), self).activated.connect(self.focus_prompt_input)
+
+    def focus_prompt_input(self):
+        self.prompt_input_panel.textarea.setFocus()
+        # and to move the cursor to the end of the text
+        cursor = self.prompt_input_panel.textarea.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.prompt_input_panel.textarea.setTextCursor(cursor)
 
     def clear_textboxes(self):
         self.prompt_input_panel.clear_text()
@@ -166,7 +170,6 @@ class MainPanel(QWidget):
         self.output_area.text_edit.setHtml(
             f"<font color='red'>Error: {message}</font> {messages.welcome_message}"
         )
-        # self.disable_inputs()
 
     def handle_partial_configuration(self):
         if not self.openai_clients:
@@ -185,3 +188,4 @@ class MainPanel(QWidget):
             )
         else:
             self.output_area.text_edit.setHtml(messages.welcome_message)
+

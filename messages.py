@@ -14,7 +14,7 @@ config_example = """
         "Claude3.5 Sonnet": "claude-3-5-sonnet-20240620"
     },
     "prompts": {
-        "Default": "This is a default prompt."
+        "Default": "This is a default prompt.",
         "J2E":"Translate to natural American English.",
         "Proofread":"Please proofread and revise the following English text to make it sound more natural. Additionally, at the end, explain any grammatical errors or areas for improvement",
     }
@@ -108,7 +108,6 @@ error_missing_models = """
 
 
 welcome_message = """
-<font color='gray'>
 <h1> Welcome to myLLM! </h1>
 <h2> How to use</h2>
 <ol type="1">
@@ -117,7 +116,7 @@ welcome_message = """
     <li> Select a model from the radio buttons.</li>
     <li> Click the 'Send' button to generate a response.</li>
     <li> The response will be displayed in the output area.</li>
-    <li> Click the '↑' button to append the response to the prompt.</li>
+    <li> Click the 'append' button to append the response to the prompt.</li>
 </ol>
 
 <h2> config.json </h2>
@@ -130,16 +129,17 @@ Keep the config.json file in the same directory as the app.
     <li> Clear input area: Ctrl+0</li>
     <li> Model radio buttons: Ctrl+Alt+1, Ctrl+Alt+2, ...</li>
     <li> Send button: Ctrl+Return</li>
-    <li> ↑ button: Alt+Return</li>
+    <li> Append button: Alt+Return</li>
     <li> Zoom in: Ctrl++</li>
     <li> Zoom out: Ctrl+-</li>
+    <li> Focus to search box: Ctrl+f</li>
+    <li> Focus to input area: Ctrl+l</li>
 </ul>
 
 <h2> Logging </h2>
 The app logs and all input/responses are saved in the log directory. Check the log file for more information. <br>
 
 Author: Wataru Uegami, MD PhD (wuegami@gmail.com)
-</font>
 """
 
 loading_message = """
