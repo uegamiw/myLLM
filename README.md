@@ -2,6 +2,9 @@
 
 myLLM is a simple desktop application that allows users to interact with various language models from OpenAI and Anthropic. The application supports multiple models and prompt templates, making it easy to switch between different configurations.
 
+<img width="1312" alt="image" src="https://github.com/user-attachments/assets/e90aef16-24fd-4030-9f87-1368bc25983e">
+
+
 ## Installation
 
 ### Option 1: Using the Distributed Binary
