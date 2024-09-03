@@ -1,9 +1,15 @@
 # myLLM
 
-myLLM is a simple desktop application that allows users to interact with various language models from OpenAI and Anthropic. The application supports multiple models and prompt templates, making it easy to switch between different configurations.
+User-friendly desktop client for Large Language Models (LLMs). This application offers a seamless interface to interact with cutting-edge AI models from OpenAI and Anthropic.
 
 <img width="1312" alt="image" src="https://github.com/user-attachments/assets/e90aef16-24fd-4030-9f87-1368bc25983e">
 
+## Key Features:
+- Clean, intuitive user interface
+- Support for OpenAI and Anthropic APIs
+- Lightning-fast search functionality
+- Extensive keyboard shortcuts for efficient navigation
+- Customizable prompts to enhance your AI interactions
 
 ## Installation
 
@@ -14,13 +20,13 @@ Download the appropriate binary (exe) from the [release page](https://github.com
 ### Option 2: Running the Python Script
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/uegamiw/myLLM.git
    cd myLLM
    ```
 
 2. Create a Conda virtual environment (recommended):
-   ```
+   ```bash
    conda create -n myllm python=3.9
    conda activate myllm
    ```
@@ -78,24 +84,40 @@ Example `config.json` file:
 ## Usage
 
 1. Run the application:
-   - If using the Python script: `python myLLM.py`
    - If using the binary: Double-click the executable file
+   - If using the Python script: `python myLLM.py`
 2. (Optional) Select a prompt template using the buttons at the top
 3. Enter your prompt in the text area
 4. Select a model using the radio buttons
 5. Click "Send" or use the shortcut (Ctrl+Return or Cmd+Return) to generate a response
 6. The response will appear in the output area
-7. Use the "Append" button (↑) or Alt+Return to add the response to your prompt for continued conversation
+7. Use the "Append" button or Alt+Return to add the response to your prompt for continued conversation
 
-### Shortcuts
+## Shortcuts
 
 - Prompt template buttons: Ctrl+1, Ctrl+2, ...
 - Clear prompt: Ctrl+0
 - Model selection: Ctrl+Alt+1, Ctrl+Alt+2, ...
-- Send: Ctrl+Return (Cmd+Return on Mac)
-- Append: Alt+Return
+- Send: Ctrl+Return
+- Append the response to the input area: Alt+Return
 - Focus on prompt text area: Ctrl+L
 - Focus on the search box: Ctrl+F
+
+## Compile Executable
+
+For Windows:
+
+```
+pip install nuitka
+python -m nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable myLLM.py
+```
+
+For MacOS:
+```bash
+pip install nuitka
+python -m nuitka --onefile --plugin-enable=pyside6 --macos-create-app-bundle --force-imports myLLM.py
+```
+
 
 ## Troubleshooting
 

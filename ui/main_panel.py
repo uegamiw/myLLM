@@ -11,14 +11,14 @@ from ui.action_button_panel import ActionButtonsPanel
 from ui.output_area import OutputArea
 from llm_client_worker import OpenAIWorker, AnthropicWorker
 from api_client_manager import APIClientManager
-from setting import deliminator, window_title, db_path, response_prefix
+from setting import deliminator, window_title, db_path, response_prefix, spacing
 import database
 
 class MainPanel(QWidget):
     def __init__(self,config, clients:APIClientManager, history_panel, logger):
         super().__init__()
         self.layout = QVBoxLayout(self)
-        self.layout.setSpacing(0)
+        self.layout.setSpacing(spacing)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.config = config
 
@@ -50,7 +50,7 @@ class MainPanel(QWidget):
         self.layout.addWidget(self.prompt_input_panel)
 
         # Model Selection
-        self.model_selection_panel = ModelSelectionPanel(self.openai_models, self.anthropic_models)
+        self.model_selection_panel = ModelSelectionPanel(self.openai_models, self.anthropic_models, self.logger)
         self.layout.addWidget(self.model_selection_panel)
 
         # Action buttons

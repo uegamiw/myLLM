@@ -9,3 +9,7 @@ config.json
 *.plist
 *.png
 Resources/
+*.app/
+*.build/
+*.dist/
+*.onefile-build/

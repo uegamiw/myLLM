@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import Signal
 from ui.text_edit_with_zoom import TextEditWithZoom
-from setting import deliminator
+from setting import deliminator, spacing
 
 class PromptInputPanel(QWidget):
     prompt_entered = Signal(str)
@@ -13,7 +13,7 @@ class PromptInputPanel(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         self.setLayout(layout)
-        layout.setSpacing(0)
+        layout.setSpacing(spacing)
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.textarea = TextEditWithZoom(self, placeholderText="Enter prompt here.")

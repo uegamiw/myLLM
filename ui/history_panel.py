@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, 
-                               QScrollArea, QHeaderView, QHBoxLayout, QLineEdit)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QScrollArea, QHeaderView, QHBoxLayout, QLineEdit)
 from PySide6.QtCore import Signal, QTimer
 from setting import n_history, search_delay
 from PySide6.QtGui import QShortcut, QKeySequence
@@ -7,8 +6,9 @@ from PySide6.QtGui import QIcon
 
 from PySide6.QtGui import QIcon, QCursor
 from PySide6.QtWidgets import QLabel
-
 from PySide6.QtCore import Qt
+
+from PySide6.QtWidgets import QTableWidget, QHeaderView
 
 class CustomTableWidget(QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -41,7 +41,6 @@ class HistoryPanel(QWidget):
 
         # table
         self.table_widget = CustomTableWidget()
-        self.table_widget.setSpan(0, 0, 0, 0)
         self.table_widget.verticalHeader().setVisible(False)
         self.table_widget.setColumnCount(4)
         self.table_widget.setHorizontalHeaderLabels(['Query', 'Response', 'Model', ''])

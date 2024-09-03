@@ -2,8 +2,9 @@ from PySide6.QtWidgets import QHBoxLayout, QRadioButton, QButtonGroup, QWidget
 from PySide6.QtGui import QShortcut, QKeySequence
 
 class ModelSelectionPanel(QWidget):
-    def __init__(self, openai_models, anthropic_models):
+    def __init__(self, openai_models, anthropic_models, logger):
         super().__init__()
+        self.logger = logger
         self.model_group = QButtonGroup()
 
         self.layout = QHBoxLayout(self)
@@ -36,3 +37,6 @@ class ModelSelectionPanel(QWidget):
             if button.text() == model_name:
                 button.setChecked(True)
                 break
+        else:
+            self.model_group.buttons()[0].setChecked(True)
+            self.logger.warning(f"Model '{model_name}' not found in the list of models.")

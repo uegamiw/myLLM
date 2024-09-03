@@ -9,7 +9,7 @@ from ui.history_panel import HistoryPanel
 from ui.main_panel import MainPanel
 from config_manager import ConfigManager
 from api_client_manager import APIClientManager
-from setting import window_title, db_path
+from setting import window_title, db_path, spacing
 import database
 
 class GPTApp(QWidget):
@@ -34,7 +34,7 @@ class GPTApp(QWidget):
         self.db_manager = database.DatabaseManager(self.logger, db_path)
 
         main_layout = QHBoxLayout(self)
-        main_layout.setSpacing(0)
+        main_layout.setSpacing(spacing)
         
         # Create a splitter
         splitter = QSplitter(Qt.Horizontal)
