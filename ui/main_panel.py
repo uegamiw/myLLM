@@ -124,6 +124,8 @@ class MainPanel(QWidget):
             new_prompt = f"{original_prompt}\n{deliminator}\n{response_prefix} {response_txt} \n{deliminator}\n"
             self.prompt_input_panel.textarea.setPlainText(new_prompt)
 
+        self.prompt_input_panel.textarea.setFocus()
+
         # place the cursor at the end of the text
         cursor = self.prompt_input_panel.textarea.textCursor()
         cursor.movePosition(cursor.MoveOperation.End)

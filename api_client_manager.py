@@ -16,7 +16,7 @@ class APIClientManager:
         except KeyError as e:
             self.logger.error(f"API Key Error (OpenAI): {e}")
         except Exception as e:
-            self.logger.error(f"API Key Error (OpenAI): {e}")
+            self.logger.error(f"Error (OpenAI): {e}")
 
     def get_anthropic_client(self):
         try:
@@ -30,4 +30,4 @@ class APIClientManager:
         except KeyError as e:
             self.logger.error(f"API Key Error (Anthropic): {e}")
         except Exception as e:
-            self.logger.error(f"API Key Error (Anthropic): {e}")
+            self.logger.error(f"Error (Anthropic): {e}")
