@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QLabel, QTableWidget, QHeaderView
 from setting import history_table_height
 import datetime
 
-
 class CustomTableWidget(QTableWidget):
     item_selected = Signal(int)
 
@@ -19,18 +18,11 @@ class CustomTableWidget(QTableWidget):
         # Style the table
         self.setStyleSheet("""
             QTableWidget {
-                background-color: #f0f0f0;
-                alternate-background-color: #e0e0e0;
-                border: 1px solid #d0d0d0;
-                gridline-color: #c0c0c0;
-            }
-            QTableWidget::item {
-                padding: 3px;
+                border: 1px solid;
             }
             QHeaderView::section {
                 background-color: #4a4a4a;
                 color: white;
-                padding: 3px;
                 border: 1px solid #3a3a3a;
             }
         """)

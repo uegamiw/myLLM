@@ -2,14 +2,18 @@ from PySide6.QtCore import QThread, Signal
 import openai
 import anthropic
 
-class Worker(QThread):
-    result = Signal(str)
+from PySide6.QtCore import QRunnable,QObject
 
+class WorkerSignals(QObject):
+    result = Signal(dict)
+
+class Worker(QRunnable):
     def __init__(self, prompt, model, logger):
         super().__init__()
         self.prompt = prompt
         self.model = model
         self.logger = logger
+        self.signals = WorkerSignals()
 
     def run(self):
         pass
@@ -30,16 +34,26 @@ class OpenAIWorker(Worker):
                 ],
                 model=self.model,
             )
-            self.result.emit(response.choices[0].message.content)
+            response = response.choices[0].message.content
         except openai.RateLimitError as e:
-            self.result.emit("Error: You have exceeded your quota. Please check your OpenAI plan and billing details.")
+            response = "Error: You have exceeded your quota. Please check your OpenAI plan and billing details."
             self.logger.error(f"Rate Limit Error: {e}")
         except openai.APIError as e:
-            self.result.emit(f"API Error: {e.message}")
             self.logger.error(f"API Error: {e}")
+            response = f"API Error: {e.message}"
         except Exception as e:
-            self.result.emit(f"Unexpected Error: {e}")
             self.logger.error(f"Unexpected Error: {e}")
+            response = f"Unexpected Error: {e}"
+
+        finally:
+            self.signals.result.emit(
+                {
+                'prompt': self.prompt,
+                'response': response,
+                'model': self.model
+                }
+            )
+
 
 class AnthropicWorker(Worker):
     def __init__(self, prompt, model, anthropic_client, logger):
@@ -59,16 +73,25 @@ class AnthropicWorker(Worker):
                 ],
                 model=self.model
             )
-            self.result.emit(response.content[0].text)
+            response = response.content[0].text
         except anthropic.APIConnectionError as e:
-            self.result.emit(f"The server could not be reached: {e.__cause__}")
             self.logger.error(f"API Connection Error: {e}")
+            response = f"API Connection Error: {e}"
         except anthropic.RateLimitError as e:
-            self.result.emit("A 429 status code was received; we should back off a bit.")
             self.logger.error(f"Rate Limit Error: {e}")
+            response = f"Rate Limit Error: {e}"
         except anthropic.APIStatusError as e:
-            self.result.emit(f"Another non-200-range status code was received. {e.status_code}, {e.response}")
             self.logger.error(f"API Status Error: {e}")
+            response = f"API Status Error: {e}"
         except Exception as e:
-            self.result.emit(f"Unexpected Error: {e}")
             self.logger.error(f"Unexpected Error: {e}")
+            response = f"Unexpected Error: {e}"
+
+        finally:
+            self.signals.result.emit(
+                {
+                'prompt': self.prompt,
+                'response': response,
+                'model': self.model
+                }
+            )

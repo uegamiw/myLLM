@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout
 )
 from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtCore import QThreadPool
 import messages
 from ui.prompt_button_panel import PromptButtonsPanel
 from ui.prompt_input_panel import PromptInputPanel
@@ -13,6 +14,7 @@ from llm_client_worker import OpenAIWorker, AnthropicWorker
 from api_client_manager import APIClientManager
 from setting import deliminator, window_title, db_path, response_prefix, spacing
 import database
+
 
 class MainPanel(QWidget):
     def __init__(self,config, clients:APIClientManager, history_panel, logger):
@@ -30,6 +32,9 @@ class MainPanel(QWidget):
         self.prompts = self.config.get("prompts", {})
         self.logger = logger
         self.history_panel = history_panel
+        self.threadpool = QThreadPool()
+
+        self.thred_counter = 0
 
         self.init_ui()
 
@@ -85,21 +90,21 @@ class MainPanel(QWidget):
         if self.prompt:
             self.logger.debug(f"model: {self.selected_model}, prompt: {self.prompt}")
 
-            # self.progress_bar.start()
             self.output_area.text_edit.clear()
             self.output_area.text_edit.setHtml(messages.loading_message)
+            self.thred_counter += 1
 
             if self.selected_model in self.openai_models.keys():
-                self.action_buttons_panel.disable_buttons()
-                self.worker = OpenAIWorker(
+                # self.action_buttons_panel.disable_buttons()
+                worker = OpenAIWorker(
                     self.prompt,
                     self.openai_models[self.selected_model],
                     self.openai_clients,
                     self.logger,
                 )
             elif self.selected_model in self.anthropic_models.keys():
-                self.action_buttons_panel.disable_buttons()
-                self.worker = AnthropicWorker(
+                # self.action_buttons_panel.disable_buttons()
+                worker = AnthropicWorker(
                     self.prompt,
                     self.anthropic_models[self.selected_model],
                     self.anthropic_clients,
@@ -107,9 +112,10 @@ class MainPanel(QWidget):
                 )
             else:
                 self.logger.error(f"Model not found: {self.selected_model}")
-            
-            self.worker.result.connect(self.update_output)
-            self.worker.start()
+                return
+
+            worker.signals.result.connect(self.update_output)
+            self.threadpool.start(worker)
 
     def handle_append(self):
         original_prompt = self.prompt_input_panel.get_text()
@@ -132,14 +138,22 @@ class MainPanel(QWidget):
         self.prompt_input_panel.textarea.setTextCursor(cursor)
     
 
-    def update_output(self, response):
+    def update_output(self, result):
+        prompt = result['prompt']
+        response = result['response']
+        model = result['model']
 
+        all_models = {**self.openai_models, **self.anthropic_models}
+        model_key = [key for key, value in all_models.items() if value == model][0]
+        
         self.output_area.set_text(response)
         self.logger.debug(f"response: {response}")
         self.action_buttons_panel.enable_buttons()
 
-        self.db_manager.insert_history(self.prompt, response, self.selected_model)
+        self.db_manager.insert_history(prompt, response, model_key)
         self.history_panel.refresh_table()
+
+        self.thred_counter -= 1
 
     def setup_shortcuts(self):
         QShortcut(QKeySequence("Ctrl+Return"), self).activated.connect(self.handle_send)

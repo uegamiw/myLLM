@@ -19,15 +19,10 @@ class ActionButtonsPanel(QWidget):
         self.send_button.clicked.connect(self.send_signal.emit)
         self.layout.addWidget(self.send_button)
 
-        # self.append_button = QPushButton("↑")
-        # self.append_button.clicked.connect(self.append_signal.emit)
-        # self.layout.addWidget(self.append_button)
-
         self.append_button = QPushButton()
-        append_icon = QIcon.fromTheme("list-add")  # または "arrow-up" を試しても良い
+        append_icon = QIcon.fromTheme("list-add")
         self.append_button.setIcon(append_icon)
-        self.append_button.setText("Append (Alt+Return)")  # テキストを設定
-        # self.append_button.setIconSize(QSize(16, 16))  # アイコンのサイズを設定
+        self.append_button.setText("Append (Alt+Return)")
         self.append_button.clicked.connect(self.append_signal.emit)
         self.layout.addWidget(self.append_button)
 

@@ -12,5 +12,6 @@ class OutputArea(ResizableTextEdit):
 
     def set_text(self, text):
         self.text_edit.clear()
-        self.text_edit.append_text(text)
+        # clear the style
+        self.text_edit.insertPlainText(text)
     
