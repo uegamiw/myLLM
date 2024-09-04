@@ -127,17 +127,17 @@ Keep the config.json file in the same directory as the app.
 <ul>
     <li> Prompt buttons: Ctrl+1, Ctrl+2, ...</li>
     <li> Clear input area: Ctrl+0</li>
+    <li> Focus to input area: Ctrl+L</li>
     <li> Model radio buttons: Ctrl+Alt+1, Ctrl+Alt+2, ...</li>
     <li> Send button: Ctrl+Return</li>
     <li> Append button: Alt+Return</li>
     <li> Zoom in: Ctrl++</li>
     <li> Zoom out: Ctrl+-</li>
-    <li> Focus to search box: Ctrl+f</li>
-    <li> Focus to input area: Ctrl+l</li>
+    <li> Focus to search box: Ctrl+F</li>
 </ul>
 
 <h2> Logging </h2>
-The app logs and all input/responses are saved in the log directory. Check the log file for more information. <br>
+The app logs are saved in the log directory. Check the log file for more information. <br>
 
 Author: Wataru Uegami, MD PhD (wuegami@gmail.com)
 """

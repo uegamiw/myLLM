@@ -159,6 +159,7 @@ class MainPanel(QWidget):
         self.prompt_input_panel.clear_text()
         self.output_area.text_edit.clear()
         self.output_area.text_edit.setHtml(messages.welcome_message)
+        self.prompt_input_panel.textarea.setFocus()
 
     def check_configuration(self):
         if not self.config:
