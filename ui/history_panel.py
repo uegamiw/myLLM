@@ -123,6 +123,9 @@ class HistoryPanel(QWidget):
 
         QShortcut(QKeySequence("Ctrl+f"), self).activated.connect(self.search_input.setFocus)
 
+        # set focus to the table
+        QShortcut(QKeySequence("Ctrl+d"), self).activated.connect(lambda: self.table_widget.setFocus())
+
         # search timer
         self.search_timer = QTimer()
         self.search_timer.setSingleShot(True)
