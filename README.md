@@ -106,9 +106,8 @@ For Windows:
 
 ```
 pip install nuitka
-python -m nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable myLLM.py
+python -m nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable app.py
 ```
-
 
 ## Troubleshooting
 

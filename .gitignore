@@ -13,3 +13,4 @@ Resources/
 *.build/
 *.dist/
 *.onefile-build/
+*.spec
