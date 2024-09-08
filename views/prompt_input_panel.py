@@ -1,23 +1,30 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import Signal
-from ui.text_edit_with_zoom import TextEditWithZoom
-from setting import deliminator, spacing
+from views.text_edit_with_zoom import TextEditWithZoom
+from views.prompt_button_panel import PromptButtonsPanel
+from utils.setting import deliminator, spacing
 
 class PromptInputPanel(QWidget):
     prompt_entered = Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, prompts, parent=None):
         super().__init__(parent)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+        self.layout.setSpacing(spacing)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.prompts = prompts
+
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        layout.setSpacing(spacing)
-        layout.setContentsMargins(0, 0, 0, 0)
 
+        # prompt buttons
+        self.prompt_buttons_panel = PromptButtonsPanel(self.prompts, self)
+        self.layout.addWidget(self.prompt_buttons_panel)
+
+        # Input area
         self.textarea = TextEditWithZoom(self, placeholderText="Enter prompt here.")
-
         self.textarea.setStyleSheet("""
             QTextEdit {
                 border: 1px solid gray;
@@ -27,7 +34,7 @@ class PromptInputPanel(QWidget):
                 border: 2px solid blue;
             }
         """)
-        layout.addWidget(self.textarea)
+        self.layout.addWidget(self.textarea)
 
     def append_text(self, text:str, deliminator:str=deliminator):
         if deliminator is not None:
@@ -47,3 +54,9 @@ class PromptInputPanel(QWidget):
     def set_text(self, text):
         self.textarea.clear()
         self.textarea.setPlainText(text)
+
+    def set_focus(self):
+        self.textarea.setFocus()
+        cursor = self.textarea.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.textarea.setTextCursor(cursor)

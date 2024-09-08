@@ -27,7 +27,7 @@ Download the appropriate binary (exe) from the [release page](https://github.com
 
 2. Create a Conda virtual environment (recommended):
    ```bash
-   conda create -n myllm python=3.9
+   conda create -n myllm python=3.12
    conda activate myllm
    ```
 

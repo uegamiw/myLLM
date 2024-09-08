@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QPushButton, QWidget
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
 
@@ -9,13 +9,13 @@ class ActionButtonsPanel(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.layout = QHBoxLayout()
+        self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
         self.send_button = QPushButton()
         send_icon = QIcon.fromTheme("mail-send")
         self.send_button.setIcon(send_icon)
-        self.send_button.setText("Send (Ctrl+Return)")
+        self.send_button.setText("Send\n(Ctrl+Return)")
         self.send_button.clicked.connect(self.send_signal.emit)
         self.layout.addWidget(self.send_button)
 

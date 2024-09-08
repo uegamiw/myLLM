@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import QMenuBar, QMenu
 from PySide6.QtCore import Signal
-from setting import deliminator, n_prompt_buttons
+from utils.setting import deliminator, n_prompt_buttons
 
 class MenuBar(QMenuBar):
+
     prompt_selected = Signal(str)
+
     def __init__(self, parent, prompts, logger):
         super().__init__(parent)
         self.prompts = prompts

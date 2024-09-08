@@ -9,6 +9,9 @@ class APIClientManager:
         self.anthropic_client = None
         self.logger = logger
 
+        self.get_openai_client()
+        self.get_anthropic_client()
+
     def get_openai_client(self):
         try:
             self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))

@@ -1,11 +1,12 @@
 import sqlite3
-from datetime import datetime
 from pathlib import Path
 from PySide6.QtCore import QObject
 import re
+from models.llm_client_worker import LLMResults
+from typing import List
 
 class DatabaseManager(QObject):
-    def __init__(self,logger, db_path):
+    def __init__(self, logger, db_path):
         super().__init__()
         self.logger = logger
         self.db_name = Path(db_path)
@@ -14,79 +15,78 @@ class DatabaseManager(QObject):
         self.connect()
         self.create_table()
 
+        # if some columns are missing, add them
+        self.cursor.execute("PRAGMA table_info(history)")
+        columns = [column[1] for column in self.cursor.fetchall()]
+        if "temperature" not in columns:
+            self.cursor.execute("ALTER TABLE history ADD COLUMN temperature INTEGER")
+            self.conn
+
+
+
     def connect(self):
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
         # Handle the exception if the self_db_name is not found)
-        
+
         except sqlite3.Error as e:
             self.logger.error(f"Error connecting to database: {e}")
 
     def create_table(self):
-        create_table_query = '''
+        create_table_query = """
         CREATE TABLE IF NOT EXISTS history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             query TEXT NOT NULL,
             response TEXT NOT NULL,
             datetime TEXT NOT NULL,
-            model TEXT NOT NULL
+            model TEXT NOT NULL,
+            temperature INTEGER
         )
-        '''
+        """
         try:
             self.cursor.execute(create_table_query)
             self.conn.commit()
         except sqlite3.Error as e:
             self.logger.error(f"Error creating table: {e}")
 
-    def insert_history(self, query, response, model):
-        insert_query = '''
-        INSERT INTO history (query, response, datetime, model)
-        VALUES (?, ?, ?, ?)
-        '''
-        current_time = datetime.now().isoformat()
+    def insert_history(self, result: LLMResults):
+        insert_query = """
+        INSERT INTO history (query, response, datetime, model, temperature)
+        VALUES (?, ?, ?, ?, ?)
+        """
+
         try:
-            self.cursor.execute(insert_query, (query, response, current_time, model))
+            self.cursor.execute(
+                insert_query,
+                (result.prompt, result.response, result.datetime, result.model, result.temperature),
+            )
             self.conn.commit()
         except sqlite3.Error as e:
             self.logger.error(f"Error inserting data: {e}")
 
-    def get_n_history(self, n) -> list:
-        """
-        Retrieves the latest 'n' history items from the database.
-
-        Args:
-            n (int): The number of history items to retrieve.
-
-        Returns:
-            list: A list of dictionaries representing the retrieved history items. Each dictionary contains the following keys:
-                - 'id' (int): The ID of the history item.
-                - 'query' (str): The query associated with the history item.
-                - 'response' (str): The response associated with the history item.
-                - 'datetime' (str): The datetime of the history item.
-                - 'model' (str): The model associated with the history item.
-
-            If an error occurs while fetching the data, an empty list is returned.
-        """
+    def get_n_history(self, n) -> List[LLMResults]:
         select_query = "SELECT * FROM history ORDER BY datetime DESC LIMIT ?"
         try:
             self.cursor.execute(select_query, (n,))
             items = []
             for item in self.cursor.fetchall():
 
-                items.append({
-                    "id": item[0],
-                    "query": item[1],
-                    "response": item[2],
-                    "datetime": item[3],
-                    "model": item[4]
-                })
+                items.append(
+                    LLMResults(
+                        id=item[0],
+                        prompt=item[1],
+                        response=item[2],
+                        datetime=item[3],
+                        model=item[4],
+                        temperature=item[5]
+                    )
+                )
             return items
 
         except sqlite3.Error as e:
             self.logger.error(f"Error fetching data: {e}")
             return []
-
 
     def delete_history(self, id):
         """
@@ -108,8 +108,7 @@ class DatabaseManager(QObject):
         except sqlite3.Error as e:
             self.logger.error(f"Error deleting data: {e}")
 
-
-    def search(self, word):
+    def search(self, word:str) -> List[LLMResults]:
         """
         Search for items in the history table based on a given word.
         Args:
@@ -121,35 +120,38 @@ class DatabaseManager(QObject):
                 - response (str): The response associated with the item.
                 - datetime (str): The datetime of the item.
                 - model (str): The model associated with the item.
+                - temperature (int): The temperature associated with the item.
         """
         # separate the words by space or full-width space
-        words = re.split(r'[\s　]+', word)
-        
+        words = re.split(r"[\s　]+", word)
+
         # develop the search query
         conditions = []
         params = []
         for w in words:
             conditions.append("(query LIKE ? OR response LIKE ?)")
             params.extend([f"%{w}%", f"%{w}%"])
-        
+
         search_query = f"SELECT * FROM history WHERE {' AND '.join(conditions)} ORDER BY datetime DESC LIMIT 100"
-        
+
         try:
             self.cursor.execute(search_query, params)
             items = []
             for item in self.cursor.fetchall():
-                items.append({
-                    "id": item[0],
-                    "query": item[1],
-                    "response": item[2],
-                    "datetime": item[3],
-                    "model": item[4]
-                })
+                items.append(
+                    LLMResults(
+                        id=item[0],
+                        prompt=item[1],
+                        response=item[2],
+                        datetime=item[3],
+                        model=item[4],
+                        temperature=item[5],
+                    )
+                )
             return items
         except sqlite3.Error as e:
             self.logger.error(f"Error fetching data: {e}")
             return []
-    
 
     def close(self):
         if self.conn:

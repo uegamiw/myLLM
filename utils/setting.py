@@ -1,7 +1,8 @@
 from pathlib import Path
 
-version = "0.2.3"
+version = "0.3.0"
 json_path = "config.json"
+window_geometry = (50, 50, 1200, 950)
 db_path = "llm_client.db"
 log_path = Path("log/llm_app.log")
 deliminator = ' ----- '
@@ -14,3 +15,4 @@ n_prompt_buttons = 5
 response_prefix = "[Model's response]:"
 spacing = 3
 history_table_height = 2
+temp_deliminator = " t"

@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QShortcut, QKeySequence
-from setting import deliminator, n_prompt_buttons
+from utils.setting import deliminator, n_prompt_buttons
 
 class PromptButtonsPanel(QWidget):
     prompt_selected = Signal(str)

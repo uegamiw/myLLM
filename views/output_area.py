@@ -1,4 +1,4 @@
-from ui.text_edit_with_zoom import ResizableTextEdit
+from views.text_edit_with_zoom import ResizableTextEdit
 
 class OutputArea(ResizableTextEdit):
     def __init__(self, parent=None):

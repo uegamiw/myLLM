@@ -1,13 +1,13 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QScrollArea, QHeaderView, QHBoxLayout, QLineEdit)
-from PySide6.QtCore import Signal, QTimer, Qt
-from setting import n_history, search_delay
-from PySide6.QtGui import QShortcut, QKeySequence, QIcon, QCursor
+from PySide6.QtCore import Signal, Qt
+from PySide6.QtGui import QIcon, QCursor
 from PySide6.QtWidgets import QLabel, QTableWidget, QHeaderView
-from setting import history_table_height
+from utils.setting import history_table_height, temp_deliminator
 import datetime
+from models.llm_client_worker import LLMResults
 
 class CustomTableWidget(QTableWidget):
-    item_selected = Signal(int)
+    item_selected = Signal(dict)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,6 +31,9 @@ class CustomTableWidget(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.horizontalHeader().setHighlightSections(False)
         self.verticalHeader().setVisible(False)
+
+        # table should not be editable on double click
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
 
         # Set selection behavior
         self.setSelectionBehavior(QTableWidget.SelectRows)
@@ -72,7 +75,7 @@ class CustomTableWidget(QTableWidget):
             super().keyPressEvent(event)
 
 class HistoryPanel(QWidget):
-    item_selected = Signal(dict)
+    # item_selected = Signal(dict)
 
     def __init__(self, db_manager, logger):
         super().__init__()
@@ -82,11 +85,10 @@ class HistoryPanel(QWidget):
 
         # search
         search_layout = QHBoxLayout()
-        self.search_input = QLineEdit()
+        self.search_box = QLineEdit()
         # self.search_input.setContentsMargins(0, 0, 0, 0)
-        self.search_input.setPlaceholderText("Search History (Ctrl+F)")
-        self.search_input.textChanged.connect(self.on_search_input_changed)
-        search_layout.addWidget(self.search_input)
+        self.search_box.setPlaceholderText("Search History (Ctrl+F)")
+        search_layout.addWidget(self.search_box)
 
         self.layout.addLayout(search_layout)
 
@@ -95,8 +97,6 @@ class HistoryPanel(QWidget):
         self.table_widget.verticalHeader().setVisible(False)
         self.table_widget.setColumnCount(4)
         self.table_widget.setHorizontalHeaderLabels(['Query', 'Response', 'Model', ''])
-        self.table_widget.cellClicked.connect(self.on_item_clicked)
-        self.table_widget.item_selected.connect(self.on_item_selected)
         
         # header
         header = self.table_widget.horizontalHeader()
@@ -111,35 +111,10 @@ class HistoryPanel(QWidget):
         
         self.layout.addWidget(scroll_area)
 
-        self.populate_table_from_db()
 
-        QShortcut(QKeySequence("Ctrl+f"), self).activated.connect(self.search_input.setFocus)
-
-        # set focus to the table
-        QShortcut(QKeySequence("Ctrl+d"), self).activated.connect(lambda: self.table_widget.setFocus())
-
-        # search timer
-        self.search_timer = QTimer()
-        self.search_timer.setSingleShot(True)
-        self.search_timer.timeout.connect(self.perform_search)
-
-        self.search_input.textChanged.connect(self.on_search_input_changed)
-
-
-    def populate_table_with_results(self, items):
-        self.table_widget.clearContents()
-        self.table_widget.setRowCount(len(items))
-        for row, item in enumerate(items):
-            self.add_item_to_table(row, item)
-
-    def populate_table_from_db(self):
-        items = self.db_manager.get_n_history(n_history)
-        self.table_widget.setRowCount(len(items))
-        for row, item in enumerate(items):
-            self.add_item_to_table(row, item)
-
-    def add_item_to_table(self, row, item):
-        date_time = datetime.datetime.fromisoformat(item['datetime'].split('.')[0])
+    def set_one_row_to_table(self, row:int, item:LLMResults):
+        date_time = item.datetime.split('.')[0]
+        date_time = datetime.datetime.fromisoformat(date_time)
 
         if date_time.date() == datetime.date.today():
             date_str = date_time.strftime("%H:%M")
@@ -150,50 +125,18 @@ class HistoryPanel(QWidget):
         else:
             date_str = date_time.strftime("%Y/%m/%d")
 
-        datetime_model = item['model'] + "\n" + date_str
-        self.table_widget.setItem(row, 0, QTableWidgetItem(item['query']))
-        self.table_widget.setItem(row, 1, QTableWidgetItem(item['response']))
+        if item.temperature is None:
+            datetime_model = item.model + "\n" + date_str
+        else:
+            datetime_model = item.model + f"{temp_deliminator}{str(item.temperature)}\n" + date_str
+
+        # datetime_model = item.model + "\n" + date_str
+        self.table_widget.setItem(row, 0, QTableWidgetItem(item.prompt))
+        self.table_widget.setItem(row, 1, QTableWidgetItem(item.response))
         self.table_widget.setItem(row, 2, QTableWidgetItem(datetime_model))
 
         delete_label = QLabel()
         delete_label.setPixmap(QIcon.fromTheme('edit-delete').pixmap(16, 16))
         delete_label.setCursor(QCursor(Qt.PointingHandCursor))
-        delete_label.mousePressEvent = lambda event: self.on_delete_label_clicked(item['id'])
+        # delete_label.mousePressEvent = lambda event: self.on_delete_label_clicked(item.id)
         self.table_widget.setCellWidget(row, 3, delete_label)
-
-    def on_item_clicked(self, row, column):
-        query = self.table_widget.item(row, 0).text()
-        response = self.table_widget.item(row, 1).text()
-        model_datetime = self.table_widget.item(row, 2).text()
-        model = model_datetime.split('\n')[0]
-
-        item = {
-            "query": query,
-            "response": response,
-            "model": model,
-        }
-        self.item_selected.emit(item)
-
-    def on_item_selected(self, row):
-        self.on_item_clicked(row, 0)
-
-    def on_delete_label_clicked(self, item_id):
-        self.db_manager.delete_history(item_id)
-        self.perform_search()
-
-    def refresh_table(self):
-        self.table_widget.clearContents()
-        self.table_widget.setRowCount(0)
-        self.populate_table_from_db()
-
-    def on_search_input_changed(self):
-        self.search_timer.start(search_delay)
-
-    def perform_search(self):
-        search_text = self.search_input.text()
-        self.logger.debug(f"perform_search, search_text: {search_text}")
-        if search_text:
-            search_results = self.db_manager.search(search_text)
-            self.populate_table_with_results(search_results)
-        else:
-            self.populate_table_from_db()

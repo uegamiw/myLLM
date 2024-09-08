@@ -4,19 +4,25 @@ from logging import getLogger, Formatter, DEBUG, INFO, StreamHandler
 from PySide6.QtWidgets import (
     QApplication,
 )
-from config_manager import ConfigManager
-from gpt_app import GPTApp
-from api_client_manager import APIClientManager
-from setting import json_path, log_path, log_backup_count, log_max_bytes
+from models.config_manager import ConfigManager
+from controllers.status_bar_controller import StatusBarController
+from views.main_window import MainWindow
+from models.api_client_manager import APIClientManager
+from utils.setting import json_path, log_path, log_backup_count, log_max_bytes, db_path
+
+from controllers.main_controller import MainController
+from views.main_window import CenterPanel
+from models.database_manager import DatabaseManager
+
 
 def main():
     file_logging = True
 
     # disable the console window on MacOS
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         file_logging = False
-        os.environ['QT_MAC_WANTS_LAYER'] = '1'
-        os.environ['QT_ENABLE_GLYPH_CACHE_WORKAROUND'] = '1'
+        os.environ["QT_MAC_WANTS_LAYER"] = "1"
+        os.environ["QT_ENABLE_GLYPH_CACHE_WORKAROUND"] = "1"
 
     # Initialize the logger
     os.makedirs(log_path.parent, exist_ok=True)
@@ -31,6 +37,7 @@ def main():
 
     if file_logging:
         from logging.handlers import RotatingFileHandler
+
         fh = RotatingFileHandler(
             log_path, maxBytes=log_max_bytes, backupCount=log_backup_count
         )
@@ -45,13 +52,26 @@ def main():
 
     api_clients_manager = APIClientManager(logger)
 
-    api_clients_manager.get_openai_client()
-    api_clients_manager.get_anthropic_client()
-
     app = QApplication(sys.argv)
-    llm_app = GPTApp(config_manager, api_clients_manager, logger)
+    db = DatabaseManager(logger, db_path)
 
-    llm_app.show()
+    main_window = MainWindow(config, api_clients_manager, db, logger)
+    status_bar_controller = StatusBarController(main_window, logger)
+
+    main_controller = MainController(
+        main_window.center_panel,
+        main_window.menubar,
+        main_window.history_panel,
+        main_window.right_panel,
+        api_clients_manager,
+        db,
+        config,
+        status_bar_controller,
+        logger
+        )
+
+
+    main_window.show()
     sys.exit(app.exec())
 
 

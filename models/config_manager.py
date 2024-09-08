@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 from pathlib import Path
 from logging import Logger
@@ -20,20 +21,37 @@ default_config = {
     }
 }
 
+@dataclass
+class Config:
+    prompts: dict = None
+    openai_models: dict = None
+    anthropic_models: dict = None
+
+
 class ConfigManager:
     def __init__(self, json_path: Path, logger: Logger) -> None:
         self.json_path = json_path
         self.logger = logger
-        self.config = self.load_config()
+        self.config = Config()
+        self.load_config_json()
 
-    def load_config(self) -> dict:
+    def load_config_json(self) -> dict:
         try:
             with open(self.json_path, "r") as f:
-                config = json.load(f)
+                config_dict = json.load(f)
                 self.logger.info(f"config.json loaded")
+            
+            self.config.prompts = config_dict.get("prompts", {})
+            self.config.openai_models = config_dict.get("openai_models", {})
+            self.config.anthropic_models = config_dict.get("anthropic_models", {})
+
+
         except FileNotFoundError as e:
             self.logger.error(f"FileNotFoundError: {e}")
-            config = default_config
+
+            self.config.prompts = default_config["prompts"]
+            self.config.openai_models = default_config["openai_models"]
+            self.config.anthropic_models = default_config["anthropic_models"]
 
             # save the default configuration
             with open(self.json_path, "w") as f:
@@ -42,8 +60,18 @@ class ConfigManager:
 
         except json.JSONDecodeError as e:
             self.logger.critical(f"JSONDecodeError: {e}")
-            config = {}
+            self.config = None
         except Exception as e:
             self.logger.critical(f"Unexpected Error: {e}")
-            config = {}
-        return config
+            self.config = None
+
+        if not self.config.prompts:
+            self.logger.error("No prompts found in config.json")
+            self.config.prompts = default_config["prompts"]
+
+        if not self.config.openai_models and not self.config.anthropic_models:
+            self.logger.error("No models found in config.json")
+            self.config.openai_models = default_config["openai_models"]
+            self.config.anthropic_models = default_config["anthropic_models"]
+
+        return self.config
