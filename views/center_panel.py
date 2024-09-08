@@ -36,7 +36,7 @@ class CenterPanel(QWidget):
 
         splitter.addWidget(self.input_panel)
         splitter.addWidget(self.output_area)
-        splitter.setSizes([200, 600])
+        splitter.setSizes([300, 500])
         self.layout.addWidget(splitter)
 
 

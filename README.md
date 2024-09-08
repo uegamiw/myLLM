@@ -2,14 +2,11 @@
 
 User-friendly desktop client for Large Language Models (LLMs). This application offers a seamless interface to interact with cutting-edge AI models from OpenAI and Anthropic.
 
-<img width="1312" alt="image" src="https://github.com/user-attachments/assets/e90aef16-24fd-4030-9f87-1368bc25983e">
-
 ## Key Features:
-- Clean, intuitive user interface
-- Support for OpenAI and Anthropic APIs
-- Lightning-fast search functionality
-- Extensive keyboard shortcuts for efficient navigation
 - Customizable prompts to enhance your AI interactions
+- Supprt for the multiple requests in parallel
+- Extensive keyboard shortcuts for efficient navigation
+- Support for OpenAI and/or Anthropic APIs
 
 ## Installation
 
@@ -85,7 +82,7 @@ Example `config.json` file:
 
 1. Run the application:
    - If using the binary: Double-click the executable file
-   - If using the Python script: `python myLLM.py`
+   - If using the Python script: `python app.py`
 2. (Optional) Select a prompt template using the buttons at the top
 3. Enter your prompt in the text area
 4. Select a model using the radio buttons
@@ -112,15 +109,8 @@ pip install nuitka
 python -m nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable myLLM.py
 ```
 
-For MacOS:
-```bash
-pip install nuitka
-python -m nuitka --onefile --plugin-enable=pyside6 --macos-create-app-bundle --force-imports myLLM.py
-```
-
 
 ## Troubleshooting
 
 1. If you encounter a "Missing API Key" error, ensure that you've properly set the environment variables for your API keys.
-2. If the `config.json` file is corrupted, you'll see an error message in the application. Make sure the file exists and is properly formatted.
-3. For any other issues, check the log file (`log/llm_app.log`) for more detailed error messages and information.
+2. For any other issues, check the log file (`log/llm_app.log`) for more detailed error messages and information.
