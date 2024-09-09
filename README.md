@@ -2,6 +2,9 @@
 
 User-friendly desktop client for Large Language Models (LLMs). This application offers a seamless interface to interact with cutting-edge AI models from OpenAI and Anthropic.
 
+<img width="1312" alt="image" src="https://github.com/user-attachments/assets/c6aaabdb-ba90-47de-8de1-58c223698ba1">
+
+
 ## Key Features:
 - Customizable prompts to enhance your AI interactions
 - Supprt for the multiple requests in parallel
