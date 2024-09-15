@@ -38,7 +38,6 @@ class MainWindow(QMainWindow):
 
         # History panel
         self.history_panel = HistoryPanel(self.db, self.logger)
-        # self.history_panel.item_selected.connect(self.show_history_item)
 
         # Center panel
         self.center_panel = CenterPanel(

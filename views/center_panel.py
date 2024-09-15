@@ -23,7 +23,7 @@ class CenterPanel(QWidget):
 
         self.logger = logger
         self.init_ui()
-        self.output_area.text_edit.setHtml(messages.welcome_message)
+        self.output_area.set_text(messages.welcome_message, style=True)
 
     def init_ui(self):
         splitter = QSplitter(Qt.Vertical)
@@ -43,5 +43,5 @@ class CenterPanel(QWidget):
     def clear_textboxes(self):
         self.input_panel.clear_text()
         self.output_area.text_edit.clear()
-        self.output_area.text_edit.setHtml(messages.welcome_message)
+        self.output_area.set_text(messages.welcome_message, style=True)
         self.input_panel.textarea.setFocus()

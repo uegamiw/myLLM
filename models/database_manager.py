@@ -88,6 +88,26 @@ class DatabaseManager(QObject):
             self.logger.error(f"Error fetching data: {e}")
             return []
 
+    def get_one_item(self, id) -> LLMResults:
+        select_query = "SELECT * FROM history WHERE id = ?"
+        try:
+            self.cursor.execute(select_query, (id,))
+            item = self.cursor.fetchone()
+            if item:
+                return LLMResults(
+                    id=item[0],
+                    prompt=item[1],
+                    response=item[2],
+                    datetime=item[3],
+                    model=item[4],
+                    temperature=item[5]
+                )
+            else:
+                return None
+        except sqlite3.Error as e:
+            self.logger.error(f"Error fetching data: {e}")
+            return None
+
     def delete_history(self, id):
         """
         Delete a record from the 'history' table based on the given id.
@@ -152,6 +172,39 @@ class DatabaseManager(QObject):
         except sqlite3.Error as e:
             self.logger.error(f"Error fetching data: {e}")
             return []
+
+    def get_latest_item(self) -> LLMResults:
+        """
+        Get the latest record in the history table.
+
+        Returns:
+        dict: A dictionary representing the latest item. It contains the following keys:
+            - id (int): The ID of the item.
+            - query (str): The query associated with the item.
+            - response (str): The response associated with the item.
+            - datetime (str): The datetime of the item.
+            - model (str): The model associated with the item.
+            - temperature (int): The temperature associated with the item.
+        """
+            
+        select_query = "SELECT * FROM history ORDER BY id DESC LIMIT 1"
+        try:
+            self.cursor.execute(select_query)
+            row = self.cursor.fetchone()
+            if row:
+                return LLMResults(
+                    id=row[0],
+                    prompt=row[1],
+                    response=row[2],
+                    datetime=row[3],
+                    model=row[4],
+                    temperature=row[5],
+                )
+            else:
+                return None
+        except sqlite3.Error as e:
+            self.logger.error(f"Error fetching data: {e}")
+            return None
 
     def close(self):
         if self.conn:

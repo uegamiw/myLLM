@@ -10,8 +10,13 @@ class OutputArea(ResizableTextEdit):
     def clear(self):
         self.text_edit.setPlainText("")
 
-    def set_text(self, text):
+    def set_text(self, text:str, style:bool):
         self.text_edit.clear()
-        # clear the style
-        self.text_edit.insertPlainText(text)
-    
+        self.text_edit.setStyleSheet("")
+
+        if not style:
+            self.text_edit.setPlainText(text)
+            return
+
+        else:
+            self.text_edit.setMarkdown(text)

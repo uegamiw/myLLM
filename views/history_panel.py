@@ -54,12 +54,12 @@ class CustomTableWidget(QTableWidget):
             
         super().setItem(row, column, item)
 
-    def resizeEvent(self, event):
-        # Adjust column widths when the table is resized
-        width = self.viewport().width()
-        for column in range(self.columnCount()):
-            self.setColumnWidth(column, width / self.columnCount())
-        super().resizeEvent(event)
+    # def resizeEvent(self, event):
+    #     # Adjust column widths when the table is resized
+    #     width = self.viewport().width()
+    #     for column in range(self.columnCount()):
+    #         self.setColumnWidth(column, width / self.columnCount())
+    #     super().resizeEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Up or event.key() == Qt.Key_Down:
@@ -125,12 +125,8 @@ class HistoryPanel(QWidget):
         else:
             date_str = date_time.strftime("%Y/%m/%d")
 
-        if item.temperature is None:
-            datetime_model = item.model + "\n" + date_str
-        else:
-            datetime_model = item.model + f"{temp_deliminator}{str(item.temperature)}\n" + date_str
+        datetime_model = item.model + "\n" + date_str
 
-        # datetime_model = item.model + "\n" + date_str
         self.table_widget.setItem(row, 0, QTableWidgetItem(item.prompt))
         self.table_widget.setItem(row, 1, QTableWidgetItem(item.response))
         self.table_widget.setItem(row, 2, QTableWidgetItem(datetime_model))
@@ -138,5 +134,4 @@ class HistoryPanel(QWidget):
         delete_label = QLabel()
         delete_label.setPixmap(QIcon.fromTheme('edit-delete').pixmap(16, 16))
         delete_label.setCursor(QCursor(Qt.PointingHandCursor))
-        # delete_label.mousePressEvent = lambda event: self.on_delete_label_clicked(item.id)
         self.table_widget.setCellWidget(row, 3, delete_label)

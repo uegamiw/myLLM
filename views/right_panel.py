@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
+
 from PySide6.QtCore import QThreadPool
 from views.model_selection_panel import ModelSelectionPanel
 from views.action_button_panel import ActionButtonsPanel
@@ -46,6 +46,11 @@ class RightPanel(QWidget):
         self.layout.addWidget(self.action_buttons_panel)
 
         self.layout.addStretch()
+
+        self.style_switch = QCheckBox()
+        self.style_switch.setText("Style")
+        self.style_switch.setChecked(True)
+        self.layout.addWidget(self.style_switch)
 
     def set_temperature(self, temp):
         if temp is None:

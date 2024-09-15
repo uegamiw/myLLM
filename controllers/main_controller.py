@@ -3,14 +3,13 @@ from views.menu_bar import MenuBar
 from views.history_panel import HistoryPanel
 from views.right_panel import RightPanel
 from PySide6.QtGui import QShortcut, QKeySequence
-from utils.setting import deliminator, response_prefix, n_history, search_delay, temp_deliminator
+from utils.setting import deliminator, response_prefix, n_history, search_delay
 from models.llm_client_worker import OpenAIWorker, AnthropicWorker, LLMResults
 from models.api_client_manager import APIClientManager
 from models.config_manager import Config
 from PySide6.QtCore import QThreadPool
 import utils.messages as messages
 from models.database_manager import DatabaseManager
-from functools import partial
 
 from typing import List
 from PySide6.QtCore import QTimer
@@ -32,7 +31,6 @@ class MainController:
 
         self.logger = logger
 
-        # self.c_panel.prompt_buttons_panel.prompt_selected.connect(self.insert_prompt)
         self.c_panel.input_panel.prompt_buttons_panel.prompt_selected.connect(self.insert_prompt)
         self.menu_bar.prompt_selected.connect(self.insert_prompt)
 
@@ -43,6 +41,14 @@ class MainController:
 
         # append button
         self.r_panel.action_buttons_panel.append_signal.connect(self.handle_append)
+        
+        # list of the table items for the history panel (database id)
+        self.table_items: List[int] = []
+        self.current_item = None
+
+        # style switch
+        self.style = True
+        self.r_panel.style_switch.stateChanged.connect(self.update_style_mode)
 
         # history panel
         self.populate_table_from_db(n_history)
@@ -63,6 +69,14 @@ class MainController:
 
         self.all_models = {**self.openai_models, **self.anthropic_models}
 
+    def update_style_mode(self):
+        self.style = self.r_panel.style_switch.isChecked()
+
+        if self.current_item is not None:
+            current_result = self.db.get_one_item(self.current_item)
+            output_str = current_result.response if current_result else ""
+
+            self.c_panel.output_area.set_text(output_str, self.style)
 
     def insert_prompt(self, prompt_text):
         self.c_panel.input_panel.clear_text()
@@ -73,8 +87,15 @@ class MainController:
         self.c_panel.input_panel.set_focus()
 
     def handle_append(self):
-        original_prompt: str = self.c_panel.input_panel.get_text()
-        response_txt: str = self.c_panel.output_area.text_edit.toPlainText()
+        self.logger.debug(f"append button, current_item: {self.current_item}")
+
+        if self.current_item is None:
+            self.logger.warning("No current item selected.")
+            return
+
+        item = self.db.get_one_item(self.current_item)
+        original_prompt = item.prompt
+        response_txt = item.response
 
         if response_txt:
             new_prompt = f"{original_prompt}\n{deliminator}\n{response_prefix} {response_txt} \n{deliminator}\n"
@@ -83,6 +104,7 @@ class MainController:
         self.c_panel.input_panel.set_focus()
 
     def handle_send(self):
+        self.current_item = None
         prompt = self.c_panel.input_panel.get_text()
         model_selected = self.r_panel.model_selection_panel.model_group.checkedButton().text()
         model_real = self.all_models[model_selected]
@@ -126,7 +148,12 @@ class MainController:
         self.status_bar_controller.decrement_threads()
         result = LLMResults(**result_dict)
         self.logger.debug(result)
+
         self.db.insert_history(result)
+
+        result = self.db.get_latest_item()
+        self.current_item = result.id
+
         self.hist_panel.table_widget.clearContents()
         self.hist_panel.table_widget.setRowCount(0)
         self.populate_table_from_db(n_history)
@@ -138,61 +165,51 @@ class MainController:
         self.c_panel.input_panel.clear_text()
         self.c_panel.input_panel.set_text(result.prompt)
         self.r_panel.model_selection_panel.set_selected_model(result.model)
-        self.c_panel.output_area.set_text(result.response)
+        self.c_panel.output_area.set_text(result.response, self.style)
         self.r_panel.set_temperature(result.temperature)
 
     def populate_table_from_db(self, num_history):
         items:List[LLMResults] = self.db.get_n_history(num_history)
-        self.hist_panel.table_widget.setRowCount(len(items))
+        self.populate_table(items)
 
-        for row, item in enumerate(items):
-            # self.add_item_to_table(row, item)
-            self.hist_panel.set_one_row_to_table(row, item)
-
-        for row in range(len(items)):
-            # link del action to the delete label
-            item_id = items[row].id
-            delete_label = self.hist_panel.table_widget.cellWidget(row, 3)
-            delete_label.mousePressEvent = lambda event, id=item_id: self.on_delete_label_clicked(id)
-
-    def populate_table_with_results(self, items):
+    def populate_table(self, items:List[LLMResults]):
         self.hist_panel.table_widget.clearContents()
         self.hist_panel.table_widget.setRowCount(len(items))
+        self.table_items = []
+
         for row, item in enumerate(items):
             self.hist_panel.set_one_row_to_table(row, item)
+            self.table_items.append(item.id)
 
-        for row in range(len(items)):
-            # link del action to the delete label
-            item_id = items[row].id
-            delete_label = self.hist_panel.table_widget.cellWidget(row, 3)
-            delete_label.mousePressEvent = partial(self.on_delete_label_clicked, item_id)
 
     def on_delete_label_clicked(self, id):
         self.logger.info(f"Delete item with id: {id}")
         self.db.delete_history(id)
+        self.table_items.remove(id)
         self.hist_panel.table_widget.clearContents()
         self.hist_panel.table_widget.setRowCount(0)
         self.populate_table_from_db(n_history)
 
     def on_table_item_clicked(self, row, column):
-        query = self.hist_panel.table_widget.item(row, 0).text()
-        response = self.hist_panel.table_widget.item(row, 1).text()
-        model_date = self.hist_panel.table_widget.item(row, 2).text()
-        model = model_date.split("\n")[0]
-        model_name = model.split(temp_deliminator)[0]
-        if temp_deliminator in model:
-            temperature = int(model.split(temp_deliminator)[1])
-        else:
-            temperature = None
+        id = self.table_items[row]
+        item = self.db.get_one_item(id)
 
-        item = {
-            "prompt": query,
-            "response": response,
-            "model": model_name,
-            'datetime': model_date.split("\n")[1],
-            'temperature': temperature
-        }
-        self.set_llm_results(item)
+        if column == 3:
+            self.on_delete_label_clicked(id)
+            return
+
+        if item:
+            self.current_item = id
+            self.set_llm_results({
+                "prompt": item.prompt,
+                "response": item.response,
+                "model": item.model,
+                'datetime': item.datetime,
+                'temperature': item.temperature
+            })
+        else:
+            self.logger.error(f"Item not found: {id}")
+
 
     def on_table_item_selected(self, row, column):
         self.on_table_item_clicked(row, 0)
@@ -202,7 +219,7 @@ class MainController:
         self.logger.debug(f"perform_search, search_text: {search_text}")
         if search_text:
             search_results = self.db.search(search_text)
-            self.populate_table_with_results(search_results)
+            self.populate_table(search_results)
         else:
             self.populate_table_from_db(n_history)
 
@@ -233,3 +250,9 @@ class MainController:
         # Ctrl + Return, for sending the prompt to the model
         self.send_shortcut = QShortcut(QKeySequence("Ctrl+Return"), self.c_panel)
         self.send_shortcut.activated.connect(self.handle_send)
+
+    def shortcut_Ctrl_0(self):
+        self.c_panel.clear_textboxes()
+        self.current_item = None
+        self.c_panel.input_panel.set_focus()
+        

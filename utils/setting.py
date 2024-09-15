@@ -1,6 +1,6 @@
 from pathlib import Path
 
-version = "0.3.0"
+version = "0.3.1"
 json_path = "config.json"
 window_geometry = (50, 50, 1200, 950)
 db_path = "llm_client.db"
