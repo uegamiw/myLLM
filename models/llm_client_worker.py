@@ -4,6 +4,7 @@ import anthropic
 from datetime import datetime
 import requests
 from PySide6.QtCore import QRunnable, QObject, Signal
+from models.chat_parser import ChatParser
 
 @dataclass
 class LLMResults:
@@ -26,6 +27,7 @@ class Worker(QRunnable):
         self.logger = logger
         self.temp = temp
         self.signals = WorkerSignals()
+        self.chart_parser = ChatParser(logger)
 
     def run(self):
         pass
@@ -36,14 +38,16 @@ class OpenAIWorker(Worker):
         self.openai_client = openai_client
 
     def run(self):
+        chat = self.chart_parser.parse(self.prompt)
         try:
             response = self.openai_client.chat.completions.create(
-                messages=[
-                    {
-                        "role": 'user',
-                        "content": self.prompt,
-                    }
-                ],
+                # messages=[
+                #     {
+                #         "role": 'user',
+                #         "content": self.prompt,
+                #     }
+                # ],
+                messages=chat,
                 model=self.model_val,
                 temperature=self.temp/5,
             )
@@ -61,7 +65,7 @@ class OpenAIWorker(Worker):
         finally:
             self.signals.result.emit(
                 {
-                'prompt': self.prompt,
+                'prompt': self.chart_parser.to_str(chat),
                 'response': response,
                 'model': self.model_key,
                 'datetime': datetime.now().isoformat(),
@@ -76,16 +80,12 @@ class AnthropicWorker(Worker):
         self.anthropic_client = anthropic_client
 
     def run(self):
+        chat = self.chart_parser.parse(self.prompt)
         try:
             response = self.anthropic_client.messages.create(
                 max_tokens=2048,
                 system='user',
-                messages=[
-                    {
-                        "role": 'user',
-                        "content": self.prompt,
-                    },
-                ],
+                messages=chat,
                 model=self.model_val,
                 temperature=self.temp/10
             )
@@ -106,7 +106,7 @@ class AnthropicWorker(Worker):
         finally:
             self.signals.result.emit(
                 {
-                'prompt': self.prompt,
+                'prompt': self.chart_parser.to_str(chat),
                 'response': response,
                 'model': self.model_key,
                 'datetime': datetime.now().isoformat(),
@@ -123,19 +123,10 @@ class PerplexityWorker(Worker):
 
     def run(self):
         url = "https://api.perplexity.ai/chat/completions"
-
+        chat = self.chart_parser.parse(self.prompt)
         payload = {
             "model": self.model_val,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Be precise and concise."
-                },
-                {
-                    "role": "user",
-                    "content": self.prompt
-                }
-            ],
+            "messages": chat,
             "max_tokens": 2048,
             "temperature": self.temp/5,
             "top_p": 0.9,
@@ -187,7 +178,7 @@ class PerplexityWorker(Worker):
         finally:
             self.signals.result.emit(
                 {
-                'prompt': self.prompt,
+                'prompt': self.chart_parser.to_str(chat),
                 'response': response,
                 'model': self.model_key,
                 'datetime': datetime.now().isoformat(),

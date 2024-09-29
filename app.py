@@ -1,6 +1,6 @@
 import os
 import sys
-from logging import getLogger, Formatter, INFO, StreamHandler
+from logging import getLogger, Formatter, INFO, StreamHandler, DEBUG
 from PySide6.QtWidgets import (
     QApplication,
 )
@@ -26,11 +26,11 @@ def main():
     # Initialize the logger
     os.makedirs(log_path.parent, exist_ok=True)
     logger = getLogger(__name__)
-    logger.setLevel(INFO)
+    logger.setLevel(DEBUG)
     formatter = Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     sh = StreamHandler()
-    sh.setLevel(INFO)
+    sh.setLevel(DEBUG)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
 

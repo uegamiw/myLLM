@@ -4,7 +4,6 @@ config_example = """
     <code>
 {
     "openai_models": {
-        "GPT3.5":"gpt-3.5-turbo",
         "GPT4o-mini": "gpt-4o-mini",
         "GPT4o": "gpt-4o"
     },
