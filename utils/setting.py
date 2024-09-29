@@ -1,13 +1,13 @@
 from pathlib import Path
 
-version = "0.3.1"
+version = "0.4.0"
 json_path = "config.json"
 window_geometry = (50, 50, 1200, 950)
 db_path = "llm_client.db"
 log_path = Path("log/llm_app.log")
-deliminator = ' ----- '
+deliminator = ' -+-+-+-+- '
 window_title = f"myLLM  v{version}"
-n_history = 300
+n_history = 100
 log_backup_count = 3
 log_max_bytes = 1000000
 search_delay = 150

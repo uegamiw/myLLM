@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         self.center_panel.input_panel.set_text(item["query"])
         self.center_panel.output_area.set_text(item["response"])
         self.center_panel.model_selection_panel.set_selected_model(item["model"])
+        # TODO: check the scripts above
 
     def closeEvent(self, event):
         self.db.close()

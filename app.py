@@ -1,6 +1,6 @@
 import os
 import sys
-from logging import getLogger, Formatter, DEBUG, INFO, StreamHandler
+from logging import getLogger, Formatter, INFO, StreamHandler
 from PySide6.QtWidgets import (
     QApplication,
 )
@@ -11,7 +11,6 @@ from models.api_client_manager import APIClientManager
 from utils.setting import json_path, log_path, log_backup_count, log_max_bytes, db_path
 
 from controllers.main_controller import MainController
-from views.main_window import CenterPanel
 from models.database_manager import DatabaseManager
 
 

@@ -4,7 +4,7 @@ from views.history_panel import HistoryPanel
 from views.right_panel import RightPanel
 from PySide6.QtGui import QShortcut, QKeySequence
 from utils.setting import deliminator, response_prefix, n_history, search_delay
-from models.llm_client_worker import OpenAIWorker, AnthropicWorker, LLMResults
+from models.llm_client_worker import OpenAIWorker, AnthropicWorker, PerplexityWorker, LLMResults
 from models.api_client_manager import APIClientManager
 from models.config_manager import Config
 from PySide6.QtCore import QThreadPool
@@ -25,9 +25,11 @@ class MainController:
         
         self.openai_clients = clients.openai_client
         self.anthropic_clients = clients.anthropic_client
+        self.perplexity_clients = clients.perplexity_client
 
         self.openai_models = config.openai_models
         self.anthropic_models = config.anthropic_models
+        self.perplexity_models = config.perplexity_models
 
         self.logger = logger
 
@@ -67,7 +69,7 @@ class MainController:
 
         self.c_panel.input_panel.set_focus()
 
-        self.all_models = {**self.openai_models, **self.anthropic_models}
+        self.all_models = {**self.openai_models, **self.anthropic_models, **self.perplexity_models}
 
     def update_style_mode(self):
         self.style = self.r_panel.style_switch.isChecked()
@@ -134,6 +136,18 @@ class MainController:
                 model_selected,
                 model_real,
                 self.anthropic_clients,
+                temperature,
+                self.logger
+                )
+
+        elif model_selected in self.perplexity_models.keys():
+            self.logger.info("Perplexity model selected")
+            self.status_bar_controller.increment_threads()
+            worker = PerplexityWorker(
+                prompt,
+                model_selected,
+                model_real,
+                self.perplexity_clients,
                 temperature,
                 self.logger
                 )

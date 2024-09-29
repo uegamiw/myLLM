@@ -14,6 +14,11 @@ default_config = {
         "Claude3 Sonnet": "claude-3-sonnet-20240229",
         "Claude3.5 Sonnet": "claude-3-5-sonnet-20240620",
     },
+    "perplexity_models": {
+        "Sonar_3.1_8B": "llama-3.1-sonar-small-128k-online",
+        "Sonar_3.1_70B": "llama-3.1-sonar-large-128k-online",
+        "Sonar_3.1_405B": "llama-3.1-sonar-huge-128k-online"
+    },
     "prompts": {
         "Default": "This is a default prompt.",
         "J2E": "Translate to natural American English.",
@@ -26,6 +31,7 @@ class Config:
     prompts: dict = None
     openai_models: dict = None
     anthropic_models: dict = None
+    perplexity_models: dict = None
 
 
 class ConfigManager:
@@ -44,6 +50,7 @@ class ConfigManager:
             self.config.prompts = config_dict.get("prompts", {})
             self.config.openai_models = config_dict.get("openai_models", {})
             self.config.anthropic_models = config_dict.get("anthropic_models", {})
+            self.config.perplexity_models = config_dict.get("perplexity_models", {})
 
 
         except FileNotFoundError as e:
@@ -52,6 +59,7 @@ class ConfigManager:
             self.config.prompts = default_config["prompts"]
             self.config.openai_models = default_config["openai_models"]
             self.config.anthropic_models = default_config["anthropic_models"]
+            self.config.perplexity_models = default_config["perplexity_models"]
 
             # save the default configuration
             with open(self.json_path, "w") as f:

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import openai
 import anthropic
 from datetime import datetime
+import requests
 from PySide6.QtCore import QRunnable, QObject, Signal
 
 @dataclass
@@ -112,3 +113,85 @@ class AnthropicWorker(Worker):
                 'temperature': self.temp
                 }
             )
+
+
+class PerplexityWorker(Worker):
+
+    def __init__(self, prompt, model_key, model_val, perplexity_client, temp, logger):
+        super().__init__(prompt, model_key, model_val, temp, logger)
+        self.perplexity_client = perplexity_client
+
+    def run(self):
+        url = "https://api.perplexity.ai/chat/completions"
+
+        payload = {
+            "model": self.model_val,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Be precise and concise."
+                },
+                {
+                    "role": "user",
+                    "content": self.prompt
+                }
+            ],
+            "max_tokens": 2048,
+            "temperature": self.temp/5,
+            "top_p": 0.9,
+            "return_citations": True,
+            "search_domain_filter": ["-perplexity.ai"],
+            "return_images": False,
+            "return_related_questions": True,
+            "search_recency_filter": "month",
+            "top_k": 0,
+            "stream": False,
+            "presence_penalty": 0,
+            "frequency_penalty": 1
+        }
+        headers = {
+            "Authorization": f"Bearer {self.perplexity_client.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            print(payload)
+            response = requests.request("POST", url, json=payload, headers=headers)
+            print(response.text)
+
+            # analyze the response (json format)
+            response = response.json()
+            response = response['choices'][0]['message']['content']
+
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Request Error: {e}")
+            response = f"Request Error: {e}"
+
+        except requests.exceptions.HTTPError as e:
+            self.logger.error(f"HTTP Error: {e}")
+            response = f"HTTP Error: {e}"
+
+        # json error
+        except ValueError as e:
+            self.logger.error(f"JSON Error: {e}")
+            response = f"JSON Error: {e}"
+
+        except KeyError as e:
+            self.logger.error(f"Key Error: {e}")
+            response = f"Key Error: {e}"
+
+        except Exception as e:
+            self.logger.error(f"Unexpected Error: {e}")
+            response = f"Unexpected Error: {e}"
+
+        finally:
+            self.signals.result.emit(
+                {
+                'prompt': self.prompt,
+                'response': response,
+                'model': self.model_key,
+                'datetime': datetime.now().isoformat(),
+                'temperature': self.temp
+                }
+            )
+

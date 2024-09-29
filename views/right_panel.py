@@ -19,9 +19,12 @@ class RightPanel(QWidget):
 
         self.openai_clients = clients.openai_client
         self.anthropic_clients = clients.anthropic_client
+        self.perplexity_clients = clients.perplexity_client
 
         self.openai_models = self.config.openai_models
         self.anthropic_models = self.config.anthropic_models
+        self.perplexity_models = self.config.perplexity_models
+
         self.prompts = self.config.prompts
 
         self.logger = logger
@@ -34,7 +37,7 @@ class RightPanel(QWidget):
 
         # Model Selection
         self.model_selection_panel = ModelSelectionPanel(
-            self.openai_models, self.anthropic_models, self.logger
+            self.openai_models, self.anthropic_models, self.perplexity_models, self.logger
         )
         self.layout.addWidget(self.model_selection_panel)
 

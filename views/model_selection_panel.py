@@ -4,12 +4,13 @@ from PySide6.QtWidgets import QLabel, QSlider
 from PySide6.QtCore import Qt
 
 class ModelSelectionPanel(QWidget):
-    def __init__(self, openai_models, anthropic_models, logger):
+    def __init__(self, openai_models, anthropic_models, perplexity_models, logger):
         super().__init__()
         self.logger = logger
         self.model_group = QButtonGroup()
         self.openai_models = openai_models
         self.anthropic_models = anthropic_models
+        self.perplexity_models = perplexity_models
 
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
@@ -25,6 +26,8 @@ class ModelSelectionPanel(QWidget):
             self.add_model_buttons(self.openai_models)
         if self.anthropic_models:
             self.add_model_buttons(self.anthropic_models)
+        if self.perplexity_models:
+            self.add_model_buttons(self.perplexity_models)
 
         if self.model_group.buttons():
             self.model_group.buttons()[0].setChecked(True)
