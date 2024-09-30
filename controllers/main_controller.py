@@ -3,7 +3,7 @@ from views.menu_bar import MenuBar
 from views.history_panel import HistoryPanel
 from views.right_panel import RightPanel
 from PySide6.QtGui import QShortcut, QKeySequence
-from utils.setting import deliminator, response_prefix, n_history, search_delay
+from utils.setting import deliminator, response_prefix, n_history, search_delay, user_prefix, system_prefix
 from models.llm_client_worker import OpenAIWorker, AnthropicWorker, PerplexityWorker, LLMResults
 from models.api_client_manager import APIClientManager
 from models.config_manager import Config
@@ -82,11 +82,13 @@ class MainController:
 
     def insert_prompt(self, prompt_text):
         self.c_panel.input_panel.clear_text()
-        self.c_panel.input_panel.append_text(prompt_text, deliminator=None)
+        self.c_panel.input_panel.set_text(system_prefix)
+        self.c_panel.input_panel.set_focus()
+        self.c_panel.input_panel.textarea.append_text(prompt_text)
         self.logger.debug(f"Prompt inserted: {prompt_text}")
-
         # auto focus on the last line
         self.c_panel.input_panel.set_focus()
+        self.c_panel.input_panel.textarea.append_text(user_prefix)
 
     def handle_append(self):
         self.logger.debug(f"append button, current_item: {self.current_item}")
@@ -176,6 +178,10 @@ class MainController:
 
     def set_llm_results(self, result:dict):
         result = LLMResults(**result)
+
+        currrent_txt = self.c_panel.input_panel.get_text()
+
+
         self.c_panel.input_panel.clear_text()
         self.c_panel.input_panel.set_text(result.prompt)
         self.r_panel.model_selection_panel.set_selected_model(result.model)

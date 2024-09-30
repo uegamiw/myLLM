@@ -41,12 +41,6 @@ class OpenAIWorker(Worker):
         chat = self.chart_parser.parse(self.prompt)
         try:
             response = self.openai_client.chat.completions.create(
-                # messages=[
-                #     {
-                #         "role": 'user',
-                #         "content": self.prompt,
-                #     }
-                # ],
                 messages=chat,
                 model=self.model_val,
                 temperature=self.temp/5,
@@ -80,7 +74,7 @@ class AnthropicWorker(Worker):
         self.anthropic_client = anthropic_client
 
     def run(self):
-        chat = self.chart_parser.parse(self.prompt)
+        chat = self.chart_parser.parse(self.prompt, allow_system=False)
         try:
             response = self.anthropic_client.messages.create(
                 max_tokens=2048,

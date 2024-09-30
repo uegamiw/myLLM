@@ -6,9 +6,8 @@ class ChatParser:
     def __init__(self, logger):
         self.logger = logger
 
-    def parse(self, text:str) -> List[Dict]:
-        print("text: ", text, "delim: ", deliminator)
-        delim = f"\n{deliminator}\n"
+    def parse(self, text:str, allow_system:bool = True) -> List[Dict]:
+        delim = f"{deliminator}"
 
         if delim in text:
             list_to_return = []
@@ -19,55 +18,71 @@ class ChatParser:
 
             for i, txt in enumerate(text_list):
 
-                if txt.startswith(system_prefix):
-                    system_content = txt[len(system_prefix):]
-                    last_role = "system"
+                if system_prefix in txt:
+                    if allow_system:
+                        system_content = txt.replace(system_prefix, "")
+                        last_role = "system"
 
-                elif txt.startswith(user_prefix) and last_role != "user":
+                    else:
+                        if last_role == "user":
+                            list_to_return[-1]["content"] += txt
+                        else:
+                            list_to_return.append({
+                                "role": "user",
+                                "content": txt
+                            })
+                            last_role = "user"
+
+                elif user_prefix in txt and last_role != "user":
+                    content = txt.replace(user_prefix, "")
+
                     list_to_return.append({
                         "role": "user",
-                        "content": txt[len(user_prefix):]
+                        "content": content
                     })
                     last_role = "user"
 
-                elif txt.startswith(user_prefix) and last_role == "user":
-                    list_to_return[-1]["content"] += txt[len(user_prefix):]
+                elif user_prefix in txt and last_role == "user":
+                    content = txt.replace(user_prefix, "")
+                    list_to_return[-1]["content"] += content
                     last_role = "user"
 
-                elif txt.startswith(response_prefix) and last_role != "assistant":
+                elif response_prefix in txt and last_role != "assistant":
+                    content = txt.replace(response_prefix, "")
                     list_to_return.append({
                         "role": "assistant",
-                        "content": txt[len(response_prefix):]
+                        "content": content
                     })
                     last_role = "assistant"
 
-                elif txt.startswith(response_prefix) and last_role == "assistant":
-                    list_to_return[-1]["content"] += txt[len(response_prefix):]
+                elif response_prefix in txt and last_role == "assistant":
+                    content = txt.replace(response_prefix, "")
+                    list_to_return[-1]["content"] += content
                     last_role = "assistant"
-
-                elif last_role == "assistant":
-                    list_to_return.append({
-                        "role": "user",
-                        "content": txt
-                    })
-                    last_role = "user"
 
                 elif last_role == "user":
                     list_to_return[-1]["content"] += txt
                     last_role = "user"
 
                 else:
-                    print("ELSE++++++++++++")
-                    print(f"*** {i=}, {txt=}")
+                    list_to_return.append({
+                        "role": "user",
+                        "content": txt
+                    })
+                    last_role = "user"
 
             if system_content:
-                # place the system content at the first index
                 list_to_return.insert(0, {
                     "role": "system",
                     "content": system_content
                 })
 
-            self.logger.debug("list_to_return: %s", list_to_return)
+            self.logger.debug(f"{len(list_to_return)} messages parsed")
+            len_user = len([m for m in list_to_return if m['role'] == 'user'])
+            len_assistant = len([m for m in list_to_return if m['role'] == 'assistant'])
+            len_system = len([m for m in list_to_return if m['role'] == 'system'])
+            self.logger.debug(f"User: {len_user}, Assistant: {len_assistant}, System: {len_system}")
+
 
             return list_to_return
 
@@ -83,10 +98,13 @@ class ChatParser:
         chat_str = ""
         for c in chat:
             if c["role"] == "user":
+                c['content'] = c['content'].replace(user_prefix, "")
                 chat_str += f"{user_prefix} {c['content']}\n"
             elif c["role"] == "assistant":
+                c['content'] = c['content'].replace(response_prefix, "")
                 chat_str += f"{response_prefix} {c['content']}\n"
             elif c["role"] == "system":
+                c['content'] = c['content'].replace(system_prefix, "")
                 chat_str += f"{system_prefix} {c['content']}\n"
             
             chat_str += deliminator + "\n"
