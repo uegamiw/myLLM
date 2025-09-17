@@ -14,9 +14,12 @@ from models.database_manager import DatabaseManager
 from typing import List
 from PySide6.QtCore import QTimer
 from controllers.status_bar_controller import StatusBarController
+from logging import Logger
 
 class MainController:
-    def __init__(self, c_panel: CenterPanel, menu_bar:MenuBar, hist_panel:HistoryPanel,r_panel:RightPanel, clients: APIClientManager,db:DatabaseManager, config:Config,status_bar_controller:StatusBarController, logger) -> None:
+    def __init__(self, c_panel: CenterPanel, menu_bar:MenuBar, hist_panel:HistoryPanel, 
+                 r_panel:RightPanel, clients: APIClientManager, db:DatabaseManager, 
+                 config:Config,status_bar_controller:StatusBarController, logger:Logger) -> None:
         self.c_panel = c_panel
         self.r_panel = r_panel
         self.menu_bar = menu_bar
@@ -97,9 +100,9 @@ class MainController:
             self.logger.warning("No current item selected.")
             return
 
-        item = self.db.get_one_item(self.current_item)
-        original_prompt = item.prompt
-        response_txt = item.response
+        llm_result = self.db.get_one_item(self.current_item)
+        original_prompt = llm_result.prompt
+        response_txt = llm_result.response
 
         if response_txt:
             new_prompt = f"{original_prompt}\n{deliminator}\n{response_prefix} {response_txt} \n{deliminator}\n"

@@ -12,9 +12,9 @@ from utils.setting import spacing
 class RightPanel(QWidget):
     def __init__(self, config:Config, clients: APIClientManager, history_panel, logger):
         super().__init__()
-        self.layout = QVBoxLayout(self)
-        self.layout.setSpacing(spacing)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.rp_layout = QVBoxLayout(self)
+        self.rp_layout.setSpacing(spacing)
+        self.rp_layout.setContentsMargins(0, 0, 0, 0)
         self.config = config
 
         self.openai_clients = clients.openai_client
@@ -39,21 +39,21 @@ class RightPanel(QWidget):
         self.model_selection_panel = ModelSelectionPanel(
             self.openai_models, self.anthropic_models, self.perplexity_models, self.logger
         )
-        self.layout.addWidget(self.model_selection_panel)
+        self.rp_layout.addWidget(self.model_selection_panel)
 
-        self.layout.addStretch()
+        self.rp_layout.addStretch()
 
 
         # Action buttons
         self.action_buttons_panel = ActionButtonsPanel()
-        self.layout.addWidget(self.action_buttons_panel)
+        self.rp_layout.addWidget(self.action_buttons_panel)
 
-        self.layout.addStretch()
+        self.rp_layout.addStretch()
 
         self.style_switch = QCheckBox()
         self.style_switch.setText("Style")
         self.style_switch.setChecked(True)
-        self.layout.addWidget(self.style_switch)
+        self.rp_layout.addWidget(self.style_switch)
 
     def set_temperature(self, temp):
         if temp is None:

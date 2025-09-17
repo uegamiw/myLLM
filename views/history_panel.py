@@ -1,10 +1,13 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QScrollArea, QHeaderView, QHBoxLayout, QLineEdit)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, \
+                               QScrollArea, QHeaderView, QHBoxLayout, QLineEdit, QAbstractItemView)
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QIcon, QCursor
 from PySide6.QtWidgets import QLabel, QTableWidget, QHeaderView
 from utils.setting import history_table_height, temp_deliminator
 import datetime
 from models.llm_client_worker import LLMResults
+from models.database_manager import DatabaseManager
+from logging import Logger
 
 class CustomTableWidget(QTableWidget):
     item_selected = Signal(dict)
@@ -28,16 +31,16 @@ class CustomTableWidget(QTableWidget):
         """)
 
         # Set header properties
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.horizontalHeader().setHighlightSections(False)
         self.verticalHeader().setVisible(False)
 
         # table should not be editable on double click
-        self.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         # Set selection behavior
-        self.setSelectionBehavior(QTableWidget.SelectRows)
-        self.setSelectionMode(QTableWidget.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
         # Enable sorting
         # self.setSortingEnabled(True)
@@ -62,11 +65,11 @@ class CustomTableWidget(QTableWidget):
     #     super().resizeEvent(event)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Up or event.key() == Qt.Key_Down:
+        if event.key() == Qt.Key.Key_Up or event.key() == Qt.Key.Key_Down:
             current_row = self.currentRow()
-            if event.key() == Qt.Key_Up and current_row > 0:
+            if event.key() == Qt.Key.Key_Up and current_row > 0:
                 self.setCurrentCell(current_row - 1, 0)
-            elif event.key() == Qt.Key_Down and current_row < self.rowCount() - 1:
+            elif event.key() == Qt.Key.Key_Down and current_row < self.rowCount() - 1:
                 self.setCurrentCell(current_row + 1, 0)
             
             self.item_selected.emit(self.currentRow())
@@ -77,9 +80,9 @@ class CustomTableWidget(QTableWidget):
 class HistoryPanel(QWidget):
     # item_selected = Signal(dict)
 
-    def __init__(self, db_manager, logger):
+    def __init__(self, db_manager: DatabaseManager, logger: Logger):
         super().__init__()
-        self.layout = QVBoxLayout(self)
+        self.main_layout = QVBoxLayout(self)
         self.db_manager = db_manager
         self.logger = logger
 
@@ -90,7 +93,7 @@ class HistoryPanel(QWidget):
         self.search_box.setPlaceholderText("Search History (Ctrl+F)")
         search_layout.addWidget(self.search_box)
 
-        self.layout.addLayout(search_layout)
+        self.main_layout.addLayout(search_layout)
 
         # table
         self.table_widget = CustomTableWidget()
@@ -100,16 +103,16 @@ class HistoryPanel(QWidget):
         
         # header
         header = self.table_widget.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.Stretch)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # set the column width
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(self.table_widget)
         
-        self.layout.addWidget(scroll_area)
+        self.main_layout.addWidget(scroll_area)
 
 
     def set_one_row_to_table(self, row:int, item:LLMResults):
@@ -133,5 +136,5 @@ class HistoryPanel(QWidget):
 
         delete_label = QLabel()
         delete_label.setPixmap(QIcon.fromTheme('edit-delete').pixmap(16, 16))
-        delete_label.setCursor(QCursor(Qt.PointingHandCursor))
+        delete_label.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.table_widget.setCellWidget(row, 3, delete_label)

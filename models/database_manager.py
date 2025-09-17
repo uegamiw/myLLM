@@ -10,9 +10,7 @@ class DatabaseManager(QObject):
         super().__init__()
         self.logger = logger
         self.db_name = Path(db_path)
-        self.conn = None
-        self.cursor = None
-        self.connect()
+        self.connect_db()
         self.create_table()
 
         # if some columns are missing, add them
@@ -20,14 +18,15 @@ class DatabaseManager(QObject):
         columns = [column[1] for column in self.cursor.fetchall()]
         if "temperature" not in columns:
             self.cursor.execute("ALTER TABLE history ADD COLUMN temperature INTEGER")
-            self.conn
+            self.conn.commit()
 
 
 
-    def connect(self):
+    def connect_db(self):
         try:
             self.conn = sqlite3.connect(self.db_name)
             self.cursor = self.conn.cursor()
+            self.logger.info(f"Connected to database: {self.db_name}")
         # Handle the exception if the self_db_name is not found)
 
         except sqlite3.Error as e:
@@ -88,7 +87,7 @@ class DatabaseManager(QObject):
             self.logger.error(f"Error fetching data: {e}")
             return []
 
-    def get_one_item(self, id) -> LLMResults:
+    def get_one_item(self, id) -> LLMResults | None:
         select_query = "SELECT * FROM history WHERE id = ?"
         try:
             self.cursor.execute(select_query, (id,))
@@ -173,7 +172,7 @@ class DatabaseManager(QObject):
             self.logger.error(f"Error fetching data: {e}")
             return []
 
-    def get_latest_item(self) -> LLMResults:
+    def get_latest_item(self) -> LLMResults | None:
         """
         Get the latest record in the history table.
 
@@ -209,3 +208,4 @@ class DatabaseManager(QObject):
     def close(self):
         if self.conn:
             self.conn.close()
+            self.logger.info(f"Disconnected from database: {self.db_name}")

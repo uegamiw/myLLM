@@ -12,7 +12,7 @@ class PromptButtonsPanel(QWidget):
 
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         layout = QHBoxLayout()
         self.setLayout(layout)
         layout.setSpacing(4)

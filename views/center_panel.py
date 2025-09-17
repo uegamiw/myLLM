@@ -8,16 +8,15 @@ from models.config_manager import Config
 
 from utils.setting import spacing
 import utils.messages as messages
-
+from logging import Logger
 
 class CenterPanel(QWidget):
-    def __init__(self, config:Config, logger):
+    def __init__(self, config:Config, logger:Logger):
         super().__init__()
-        self.layout = QVBoxLayout(self)
-        self.layout.setSpacing(spacing)
-        self.layout.setContentsMargins(1, 1, 1, 1)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setSpacing(spacing)
+        self.main_layout.setContentsMargins(1, 1, 1, 1)
         self.config = config
-
 
         self.prompts = self.config.prompts
 
@@ -25,8 +24,8 @@ class CenterPanel(QWidget):
         self.init_ui()
         self.output_area.set_text(messages.welcome_message, style=True)
 
-    def init_ui(self):
-        splitter = QSplitter(Qt.Vertical)
+    def init_ui(self) -> None:
+        splitter = QSplitter(Qt.Orientation.Vertical)
 
         # Prompt input
         self.input_panel = PromptInputPanel(self.prompts)
@@ -37,10 +36,10 @@ class CenterPanel(QWidget):
         splitter.addWidget(self.input_panel)
         splitter.addWidget(self.output_area)
         splitter.setSizes([300, 500])
-        self.layout.addWidget(splitter)
+        self.main_layout.addWidget(splitter)
 
 
-    def clear_textboxes(self):
+    def clear_textboxes(self) -> None:
         self.input_panel.clear_text()
         self.output_area.text_edit.clear()
         self.output_area.set_text(messages.welcome_message, style=True)

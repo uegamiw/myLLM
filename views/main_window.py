@@ -8,21 +8,22 @@ from models.config_manager import Config
 from models.api_client_manager import APIClientManager
 from models.database_manager import DatabaseManager
 from utils.setting import window_title, spacing, window_geometry
+from logging import Logger
 
 class MainWindow(QMainWindow):
     def __init__(
-        self, config:Config, clients: APIClientManager, db: DatabaseManager,  logger
+        self, config:Config, clients: APIClientManager, db: DatabaseManager, logger:Logger
     ):
         super().__init__()
-        self.config = config
-        self.clients = clients
-        self.prompts = self.config.prompts
-        self.db = db
-        self.logger = logger
+        self.config: Config = config
+        self.clients: APIClientManager = clients
+        self.prompts: dict = self.config.prompts
+        self.db: DatabaseManager = db
+        self.logger: Logger = logger
 
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.setWindowTitle(window_title)
         self.setGeometry(*window_geometry)
 
@@ -34,7 +35,7 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(spacing)
 
         # Create a splitter
-        splitter = QSplitter(Qt.Horizontal)
+        splitter: QSplitter = QSplitter(Qt.Orientation.Horizontal)
 
         # History panel
         self.history_panel = HistoryPanel(self.db, self.logger)
@@ -67,10 +68,10 @@ class MainWindow(QMainWindow):
     def show_history_item(self, item):
         self.center_panel.input_panel.set_text(item["query"])
         self.center_panel.output_area.set_text(item["response"])
-        self.center_panel.model_selection_panel.set_selected_model(item["model"])
+        self.right_panel.model_selection_panel.set_selected_model(item["model"])
         # TODO: check the scripts above
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         self.db.close()
         self.logger.info("App Closed")
         event.accept()

@@ -9,10 +9,10 @@ class PromptInputPanel(QWidget):
 
     def __init__(self, prompts, parent=None):
         super().__init__(parent)
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-        self.layout.setSpacing(spacing)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.pi_layout = QVBoxLayout()
+        self.setLayout(self.pi_layout)
+        self.pi_layout.setSpacing(spacing)
+        self.pi_layout.setContentsMargins(0, 0, 0, 0)
         self.prompts = prompts
 
         self.init_ui()
@@ -21,7 +21,7 @@ class PromptInputPanel(QWidget):
 
         # prompt buttons
         self.prompt_buttons_panel = PromptButtonsPanel(self.prompts, self)
-        self.layout.addWidget(self.prompt_buttons_panel)
+        self.pi_layout.addWidget(self.prompt_buttons_panel)
 
         # Input area
         self.textarea = TextEditWithZoom(self, placeholderText="Enter prompt here.")
@@ -34,7 +34,7 @@ class PromptInputPanel(QWidget):
                 border: 2px solid blue;
             }
         """)
-        self.layout.addWidget(self.textarea)
+        self.pi_layout.addWidget(self.textarea)
 
     def append_text(self, text:str, deliminator:str=deliminator):
         if deliminator is not None:

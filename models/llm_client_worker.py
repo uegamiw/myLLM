@@ -12,8 +12,8 @@ class LLMResults:
     response: str
     model: str
     datetime: str
-    id: int = None
-    temperature: int = None # 1-10
+    temperature: int
+    id: int | None = None
 
 class WorkerSignals(QObject):
     result = Signal(dict)
@@ -39,6 +39,7 @@ class OpenAIWorker(Worker):
 
     def run(self):
         chat = self.chart_parser.parse(self.prompt)
+        response = 'default response'
         try:
             response = self.openai_client.chat.completions.create(
                 messages=chat,
@@ -75,6 +76,7 @@ class AnthropicWorker(Worker):
 
     def run(self):
         chat = self.chart_parser.parse(self.prompt, allow_system=False)
+        response = 'default response'
         try:
             response = self.anthropic_client.messages.create(
                 max_tokens=2048,
@@ -138,6 +140,7 @@ class PerplexityWorker(Worker):
             "Authorization": f"Bearer {self.perplexity_client.api_key}",
             "Content-Type": "application/json"
         }
+        response = 'default response'
 
         try:
             print(payload)
@@ -151,10 +154,6 @@ class PerplexityWorker(Worker):
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Request Error: {e}")
             response = f"Request Error: {e}"
-
-        except requests.exceptions.HTTPError as e:
-            self.logger.error(f"HTTP Error: {e}")
-            response = f"HTTP Error: {e}"
 
         # json error
         except ValueError as e:

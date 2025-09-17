@@ -7,12 +7,12 @@ class TextEditWithZoom(QTextEdit):
         super().__init__(*args, **kwargs)
         self.defaultFontSize = self.font().pointSize()
 
-    def keyPressEvent(self, event: QKeyEvent):
-        if event.modifiers() == Qt.ControlModifier:
-            if event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            if event.key() == Qt.Key.Key_Plus or event.key() == Qt.Key.Key_Equal:
                 self.zoomIn()
                 return
-            elif event.key() == Qt.Key_Minus:
+            elif event.key() == Qt.Key.Key_Minus:
                 self.zoomOut()
                 return
         super().keyPressEvent(event)

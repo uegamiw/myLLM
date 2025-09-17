@@ -12,15 +12,15 @@ class ModelSelectionPanel(QWidget):
         self.anthropic_models = anthropic_models
         self.perplexity_models = perplexity_models
 
-        self.layout = QVBoxLayout(self)
-        self.setLayout(self.layout)
+        self.ms_layout = QVBoxLayout(self)
+        self.setLayout(self.ms_layout)
 
         self.init_ui()
 
 
     def init_ui(self):
         # insert text
-        self.layout.addWidget(QLabel("Select Model:"))
+        self.ms_layout.addWidget(QLabel("Select Model:"))
 
         if self.openai_models:
             self.add_model_buttons(self.openai_models)
@@ -32,29 +32,31 @@ class ModelSelectionPanel(QWidget):
         if self.model_group.buttons():
             self.model_group.buttons()[0].setChecked(True)
 
+            self.shortcuts = []
             for i, button in enumerate(self.model_group.buttons()):
-                button.shortcut = QShortcut(QKeySequence(f"Ctrl+Alt+{i+1}"), button)
-                button.shortcut.activated.connect(button.click)
+                shortcut = QShortcut(QKeySequence(f"Ctrl+Alt+{i+1}"), button)
+                shortcut.activated.connect(button.click)
+                self.shortcuts.append(shortcut)
 
         # set space here
-        self.layout.addSpacing(5)
+        self.ms_layout.addSpacing(5)
 
         # Temperature
-        self.layout.addWidget(QLabel("Temperature:"))
+        self.ms_layout.addWidget(QLabel("Temperature:"))
         # set a slider widget for temperature
-        self.temperature_slider = QSlider(Qt.Horizontal)
+        self.temperature_slider = QSlider(Qt.Orientation.Horizontal)
         self.temperature_slider.setMinimum(0)
         self.temperature_slider.setMaximum(10)
         self.temperature_slider.setSingleStep(1)
         self.temperature_slider.setValue(0)
-        self.layout.addWidget(self.temperature_slider)
+        self.ms_layout.addWidget(self.temperature_slider)
 
 
 
     def add_model_buttons(self, models):
         for model in models.keys():
             button = QRadioButton(model)
-            self.layout.addWidget(button)
+            self.ms_layout.addWidget(button)
             self.model_group.addButton(button)
 
     def selected_model(self):

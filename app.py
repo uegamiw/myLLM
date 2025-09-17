@@ -4,7 +4,7 @@ from logging import getLogger, Formatter, INFO, StreamHandler, DEBUG
 from PySide6.QtWidgets import (
     QApplication,
 )
-from models.config_manager import ConfigManager
+from models.config_manager import ConfigManager, Config
 from controllers.status_bar_controller import StatusBarController
 from views.main_window import MainWindow
 from models.api_client_manager import APIClientManager
@@ -12,7 +12,6 @@ from utils.setting import json_path, log_path, log_backup_count, log_max_bytes, 
 
 from controllers.main_controller import MainController
 from models.database_manager import DatabaseManager
-
 
 def main():
     file_logging = True
@@ -48,6 +47,9 @@ def main():
 
     config_manager = ConfigManager(json_path, logger)
     config = config_manager.config
+
+    if config is None:
+        raise ValueError("Config could not be loaded and is None.")
 
     api_clients_manager = APIClientManager(logger)
 

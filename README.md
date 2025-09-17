@@ -25,15 +25,15 @@ Download the appropriate binary (exe) from the [release page](https://github.com
    cd myLLM
    ```
 
-2. Create a Conda virtual environment (recommended):
+2. Create a virtual environment (recommended):
    ```bash
-   conda create -n myllm python=3.12
-   conda activate myllm
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
 
 3. Install the required packages:
-   ```
-   pip install -r openai anthropic PySide6
+   ```bash
+   python -m pip install openai anthropic PySide6 requests
    ```
 
 ## Configuration
@@ -63,15 +63,20 @@ Example `config.json` file:
 
 ```json
 {
-    "openai_models": {
-        "GPT3.5": "gpt-3.5-turbo",
+   "openai_models": {
         "GPT4o-mini": "gpt-4o-mini",
-        "GPT4o": "gpt-4o"
+        "GPT4o": "gpt-4o",
+        "GPT5-nano": "gpt-5-nano-2025-08-07",
+        "GPT5-mini": "gpt-5-mini-2025-08-07",
+        "GPT5": "gpt-5-2025-08-07"
     },
     "anthropic_models": {
         "Claude3 Haiku": "claude-3-haiku-20240307",
-        "Claude3 Sonnet": "claude-3-sonnet-20240229",
-        "Claude3.5 Sonnet": "claude-3-5-sonnet-20240620"
+        "Claude3.5 Haiku": "claude-3-5-haiku-latest",
+        "Sonnet 3.7": "claude-3-7-sonnet-latest",
+        "Sonnet 4": "claude-sonnet-4-20250514",
+        "Opus 4": "claude-opus-4-20250514",
+        "Opus 4.1": "claude-opus-4-1-20250805"
     },
     "prompts": {
         "Default": "This is a default prompt.",
