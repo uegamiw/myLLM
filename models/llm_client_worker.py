@@ -74,13 +74,15 @@ class AnthropicWorker(Worker):
         self.anthropic_client = anthropic_client
 
     def run(self):
-        chat = self.chart_parser.parse(self.prompt, allow_system=False)
+        chat = self.chart_parser.parse(self.prompt, allow_system=True)
+        system_content = next((m["content"] for m in chat if m["role"] == "system"), "")
+        messages = [m for m in chat if m["role"] != "system"]
         response = 'default response'
         try:
             response = self.anthropic_client.messages.create(
                 max_tokens=2048,
-                system='user',
-                messages=chat,
+                system=system_content,
+                messages=messages,
                 model=self.model_val,
             )
             response = response.content[0].text

@@ -41,6 +41,11 @@ class MainController:
 
         self.threadpool = QThreadPool()
 
+        # keep strong references to in-flight workers so Qt can't garbage
+        # collect them (and their signals object) before the queued result
+        # signal is delivered on the main thread
+        self.active_workers = []
+
         # send button
         self.r_panel.action_buttons_panel.send_signal.connect(self.handle_send)
 
@@ -160,8 +165,14 @@ class MainController:
             self.logger.error(f"Model not found: {model_selected}")
             return
         
-        worker.signals.result.connect(self.update_output)
+        worker.setAutoDelete(False)
+        self.active_workers.append(worker)
+        worker.signals.result.connect(lambda result_dict, w=worker: self.handle_worker_result(w, result_dict))
         self.threadpool.start(worker)
+
+    def handle_worker_result(self, worker, result_dict:dict):
+        self.active_workers.remove(worker)
+        self.update_output(result_dict)
 
     def update_output(self, result_dict:dict):
         self.status_bar_controller.decrement_threads()
