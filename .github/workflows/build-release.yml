@@ -43,13 +43,14 @@ jobs:
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        run: python -m nuitka --onefile --plugin-enable=pyside6 --windows-console-mode=disable --output-filename=app.exe app.py
+        run: python -m nuitka --onefile --assume-yes-for-downloads --plugin-enable=pyside6 --windows-console-mode=disable --output-filename=app.exe app.py
 
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: |
           python -m nuitka \
             --standalone \
+            --assume-yes-for-downloads \
             --macos-create-app-bundle \
             --macos-app-name=myLLM \
             --macos-app-icon=icon.png \
