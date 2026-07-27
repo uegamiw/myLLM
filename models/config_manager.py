@@ -5,19 +5,21 @@ from logging import Logger
 
 default_config = {
    "openai_models": {
-        "GPT4o-mini": "gpt-4o-mini",
-        "GPT4o": "gpt-4o",
-        "GPT5-nano": "gpt-5-nano-2025-08-07",
-        "GPT5-mini": "gpt-5-mini-2025-08-07",
-        "GPT5": "gpt-5-2025-08-07"
+        "GPT-5.6 Luna": "gpt-5.6-luna",
+        "GPT-5.6 Terra": "gpt-5.6-terra",
+        "GPT-5.6 Sol": "gpt-5.6-sol"
     },
     "anthropic_models": {
-        "Claude3 Haiku": "claude-3-haiku-20240307",
-        "Claude3.5 Haiku": "claude-3-5-haiku-latest",
-        "Sonnet 3.7": "claude-3-7-sonnet-latest",
-        "Sonnet 4": "claude-sonnet-4-20250514",
-        "Opus 4": "claude-opus-4-20250514",
-        "Opus 4.1": "claude-opus-4-1-20250805"
+        "Haiku 4.5": "claude-haiku-4-5",
+        "Sonnet 5": "claude-sonnet-5",
+        "Opus 5": "claude-opus-5",
+        "Fable 5": "claude-fable-5"
+    },
+    "perplexity_models": {
+        "Sonar": "sonar",
+        "Sonar Pro": "sonar-pro",
+        "Sonar Reasoning Pro": "sonar-reasoning-pro",
+        "Sonar Deep Research": "sonar-deep-research"
     },
     "prompts": {
         "Default": "This is a default prompt.",

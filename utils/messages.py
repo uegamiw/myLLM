@@ -8,9 +8,9 @@ config_example = """
         "GPT4o": "gpt-4o"
     },
     "anthropic_models": {
-        "Claude3 Haiku": "claude-3-haiku-20240307",
-        "Claude3 Sonnet": "claude-3-sonnet-20240229",
-        "Claude3.5 Sonnet": "claude-3-5-sonnet-20240620"
+        "Haiku 4.5": "claude-haiku-4-5",
+        "Sonnet 5": "claude-sonnet-5",
+        "Opus 5": "claude-opus-5"
     },
     "prompts": {
         "Default": "This is a default prompt.",

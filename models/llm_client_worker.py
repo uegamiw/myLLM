@@ -44,7 +44,6 @@ class OpenAIWorker(Worker):
             response = self.openai_client.chat.completions.create(
                 messages=chat,
                 model=self.model_val,
-                temperature=self.temp/5,
             )
             response = response.choices[0].message.content
         except openai.RateLimitError as e:
@@ -83,7 +82,6 @@ class AnthropicWorker(Worker):
                 system='user',
                 messages=chat,
                 model=self.model_val,
-                temperature=self.temp/10
             )
             response = response.content[0].text
         except anthropic.APIConnectionError as e:
@@ -118,23 +116,16 @@ class PerplexityWorker(Worker):
         self.perplexity_client = perplexity_client
 
     def run(self):
-        url = "https://api.perplexity.ai/chat/completions"
+        # Perplexity retired Sonar Chat Completions in favor of the Agent API.
+        url = "https://api.perplexity.ai/v1/agent"
         chat = self.chart_parser.parse(self.prompt)
         payload = {
             "model": self.model_val,
-            "messages": chat,
-            "max_tokens": 2048,
+            "input": chat,
+            "max_output_tokens": 2048,
             "temperature": self.temp/5,
             "top_p": 0.9,
-            "return_citations": True,
-            "search_domain_filter": ["-perplexity.ai"],
-            "return_images": False,
-            "return_related_questions": True,
-            "search_recency_filter": "month",
-            "top_k": 0,
             "stream": False,
-            "presence_penalty": 0,
-            "frequency_penalty": 1
         }
         headers = {
             "Authorization": f"Bearer {self.perplexity_client.api_key}",
@@ -149,7 +140,17 @@ class PerplexityWorker(Worker):
 
             # analyze the response (json format)
             response = response.json()
-            response = response['choices'][0]['message']['content']
+            if response.get('status') not in ('completed', None):
+                raise ValueError(f"Agent API returned status: {response.get('status')}")
+
+            text_parts = [
+                content['text']
+                for item in response.get('output', [])
+                if item.get('type') == 'message'
+                for content in item.get('content', [])
+                if content.get('type') == 'output_text'
+            ]
+            response = "\n".join(text_parts) if text_parts else "Error: No output_text found in Agent API response."
 
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Request Error: {e}")
