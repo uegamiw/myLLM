@@ -27,7 +27,7 @@ jobs:
           - os: windows-latest
             asset: app.exe
           - os: macos-latest
-            asset: app-macos.zip
+            asset: myLLM-macos.dmg
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -48,8 +48,26 @@ jobs:
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: |
-          python -m nuitka --standalone --macos-create-app-bundle --plugin-enable=pyside6 app.py
-          ditto -c -k --sequesterRsrc --keepParent app.app app-macos.zip
+          python -m nuitka \
+            --standalone \
+            --macos-create-app-bundle \
+            --macos-app-name=myLLM \
+            --macos-app-icon=icon.png \
+            --plugin-enable=pyside6 \
+            app.py
+          mv app.app myLLM.app
+
+          # Ad-hoc sign so Gatekeeper's warning is the milder
+          # "unidentified developer" prompt instead of "app is damaged".
+          codesign --force --deep -s - myLLM.app
+
+      - name: Package DMG (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          dmg_dir=$(mktemp -d)
+          cp -R myLLM.app "$dmg_dir/"
+          ln -s /Applications "$dmg_dir/Applications"
+          hdiutil create -volname "myLLM" -srcfolder "$dmg_dir" -ov -format UDZO myLLM-macos.dmg
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2

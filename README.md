@@ -15,7 +15,9 @@ User-friendly desktop client for Large Language Models (LLMs). This application 
 
 ### Option 1: Using the Distributed Binary
 
-Download the appropriate binary (exe) from the [release page](https://github.com/uegamiw/myLLM/releases).
+Download the appropriate binary from the [release page](https://github.com/uegamiw/myLLM/releases):
+- Windows: `app.exe`
+- macOS: `myLLM-macos.dmg` — open it and drag `myLLM.app` into the `Applications` shortcut. Since the app is not notarized by Apple, the first launch requires right-clicking the app and choosing "Open" (instead of double-clicking) to bypass Gatekeeper.
 
 ### Option 2: Running the Python Script
 
